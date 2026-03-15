@@ -1,0 +1,585 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Gift, Sparkles, Trophy, Users, Crown, RotateCw, PartyPopper } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+
+const STORAGE_KEY = "spin-wheel-event-state-v2";
+const DEVICE_KEY = "spin-wheel-device-id-v1";
+const TOTAL_SECTORS = 50;
+const WINNER_INDEX = 7;
+const TRY_AGAIN_INDEX = 23;
+const WHEEL_SIZE = 520;
+const CENTER = WHEEL_SIZE / 2;
+const RADIUS = 224;
+
+type Segment = {
+  label: string;
+  type: "winner" | "tryAgain" | "niceTry";
+  icon: string;
+};
+
+type PlayerRecord = {
+  id: string;
+  name: string;
+  spins: number;
+  status: "winner" | "not_yet_won";
+};
+
+type StoredState = {
+  players: PlayerRecord[];
+  winnerName: string | null;
+  totalSpins: number;
+};
+
+const segments: Segment[] = Array.from({ length: TOTAL_SECTORS }, (_, index) => {
+  if (index === WINNER_INDEX) {
+    return { label: "WINNER", type: "winner", icon: "🎁" };
+  }
+  if (index === TRY_AGAIN_INDEX) {
+    return { label: "TRY AGAIN", type: "tryAgain", icon: "🔄" };
+  }
+  return { label: "NICE TRY", type: "niceTry", icon: "❤️" };
+});
+
+function getDeviceId() {
+  if (typeof window === "undefined") return "server-device";
+  const saved = window.localStorage.getItem(DEVICE_KEY);
+  if (saved) return saved;
+  const created = `device-${Math.random().toString(36).slice(2, 10)}`;
+  window.localStorage.setItem(DEVICE_KEY, created);
+  return created;
+}
+
+function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
+  const angleRad = ((angleDeg - 90) * Math.PI) / 180;
+  return {
+    x: cx + r * Math.cos(angleRad),
+    y: cy + r * Math.sin(angleRad),
+  };
+}
+
+function describeArcSlice(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+  return [
+    `M ${cx} ${cy}`,
+    `L ${start.x} ${start.y}`,
+    `A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`,
+    "Z",
+  ].join(" ");
+}
+
+function getSegmentColors(type: Segment["type"]) {
+  if (type === "winner") return ["#b7791f", "#f6d365"];
+  if (type === "tryAgain") return ["#14532d", "#4ade80"];
+  return ["#7f1d1d", "#ef4444"];
+}
+
+function giftBox() {
+  return (
+    <motion.div
+      initial={{ scale: 0.92, opacity: 0.7 }}
+      animate={{ scale: [0.96, 1.04, 0.98], opacity: 1, rotate: [0, -3, 3, 0] }}
+      transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+      className="relative mx-auto h-28 w-28"
+    >
+      <div className="absolute inset-x-4 top-8 h-16 rounded-b-[22px] bg-gradient-to-b from-yellow-200 to-yellow-400 shadow-[0_18px_40px_rgba(0,0,0,0.25)]" />
+      <div className="absolute inset-x-2 top-5 h-6 rounded-t-[16px] bg-gradient-to-b from-yellow-100 to-yellow-300" />
+      <div className="absolute left-1/2 top-5 h-19 w-3 -translate-x-1/2 rounded-full bg-emerald-700" />
+      <div className="absolute inset-x-0 top-12 mx-auto h-3 w-24 rounded-full bg-emerald-700" />
+      <div className="absolute left-[28px] top-0 h-10 w-10 rounded-full border-[8px] border-emerald-700 border-r-transparent border-b-transparent rotate-[-25deg]" />
+      <div className="absolute right-[28px] top-0 h-10 w-10 rounded-full border-[8px] border-emerald-700 border-l-transparent border-b-transparent rotate-[25deg]" />
+      <motion.div
+        animate={{ y: [-2, -8, -2] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -right-3 -top-4 text-2xl"
+      >
+        ✨
+      </motion.div>
+      <motion.div
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 1.7, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+        className="absolute -left-2 top-1 text-xl"
+      >
+        🎉
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export default function SpinWheelWebsite() {
+  const [rotation, setRotation] = useState(0);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [playerName, setPlayerName] = useState("");
+  const [activePlayerId, setActivePlayerId] = useState("");
+  const [players, setPlayers] = useState<PlayerRecord[]>([]);
+  const [winnerName, setWinnerName] = useState<string | null>(null);
+  const [totalSpins, setTotalSpins] = useState(0);
+  const [result, setResult] = useState<Segment | null>(null);
+  const [message, setMessage] = useState("Enter your name to begin.");
+  const [deviceReady, setDeviceReady] = useState(false);
+
+  const sliceAngle = 360 / segments.length;
+
+  useEffect(() => {
+    const deviceId = getDeviceId();
+    setActivePlayerId(deviceId);
+
+    if (typeof window !== "undefined") {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed: StoredState = JSON.parse(raw);
+          setPlayers(parsed.players || []);
+          setWinnerName(parsed.winnerName || null);
+          setTotalSpins(parsed.totalSpins || 0);
+          const current = (parsed.players || []).find((p) => p.id === deviceId);
+          if (current) {
+            setPlayerName(current.name);
+            setMessage(
+              current.status === "winner"
+                ? `${current.name}, this device has already won.`
+                : `${current.name}, you may keep spinning until you hit TRY AGAIN or WINNER.`
+            );
+          }
+        } catch {
+          // ignore bad storage
+        }
+      }
+    }
+    setDeviceReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!deviceReady || typeof window === "undefined") return;
+    const data: StoredState = { players, winnerName, totalSpins };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }, [players, winnerName, totalSpins, deviceReady]);
+
+  const currentPlayer = useMemo(
+    () => players.find((player) => player.id === activePlayerId) || null,
+    [players, activePlayerId]
+  );
+
+  const canSpin = useMemo(() => {
+    if (!playerName.trim()) return false;
+    if (isSpinning) return false;
+    if (currentPlayer?.status === "winner") return false;
+    return true;
+  }, [playerName, isSpinning, currentPlayer]);
+
+  const hasRegistered = !!currentPlayer;
+
+  const wheelSegments = useMemo(() => {
+    return segments.map((segment, index) => {
+      const startAngle = index * sliceAngle;
+      const endAngle = startAngle + sliceAngle;
+      const midAngle = startAngle + sliceAngle / 2;
+      const textPoint = polarToCartesian(CENTER, CENTER, 158, midAngle);
+      const [c1, c2] = getSegmentColors(segment.type);
+      return {
+        ...segment,
+        index,
+        path: describeArcSlice(CENTER, CENTER, RADIUS, startAngle, endAngle),
+        midAngle,
+        textPoint,
+        fill: `url(#grad-${index})`,
+        c1,
+        c2,
+      };
+    });
+  }, [sliceAngle]);
+
+  const ensurePlayer = () => {
+    const trimmed = playerName.trim();
+    if (!trimmed) return null;
+
+    const existing = players.find((p) => p.id === activePlayerId);
+    if (existing) {
+      if (existing.name !== trimmed) {
+        setPlayers((prev) => prev.map((p) => (p.id === activePlayerId ? { ...p, name: trimmed } : p)));
+      }
+      return { ...existing, name: trimmed };
+    }
+
+    const created: PlayerRecord = {
+      id: activePlayerId,
+      name: trimmed,
+      spins: 0,
+      status: "not_yet_won",
+    };
+    setPlayers((prev) => [created, ...prev]);
+    return created;
+  };
+
+  const spinWheel = () => {
+    if (!canSpin) return;
+
+    const player = ensurePlayer();
+    if (!player) return;
+
+    setIsSpinning(true);
+    setResult(null);
+    setMessage("The wheel is spinning...");
+
+    const randomIndex = Math.floor(Math.random() * segments.length);
+    const selectedSegment = segments[randomIndex];
+    const targetSegmentCenter = randomIndex * sliceAngle + sliceAngle / 2;
+    const targetRotation = 360 - targetSegmentCenter;
+    const extraSpins = 360 * (7 + Math.floor(Math.random() * 2));
+    const newRotation = rotation + extraSpins + targetRotation + 360;
+
+    setRotation(newRotation);
+
+    window.setTimeout(() => {
+      setResult(selectedSegment);
+      setIsSpinning(false);
+      setTotalSpins((prev) => prev + 1);
+
+      setPlayers((prev) => {
+        const existing = prev.find((p) => p.id === activePlayerId);
+        if (!existing) return prev;
+        return prev.map((p) => {
+          if (p.id !== activePlayerId) return p;
+          return {
+            ...p,
+            spins: p.spins + 1,
+            status: selectedSegment.type === "winner" ? "winner" : p.status,
+          };
+        });
+      });
+
+      if (selectedSegment.type === "winner") {
+        setWinnerName(playerName.trim());
+        setMessage("Congratulations! Only the golden WINNER sector gives the gift.");
+      } else if (selectedSegment.type === "tryAgain") {
+        setMessage("TRY AGAIN landed. You can spin again from this same device.");
+      } else {
+        setMessage("NICE TRY landed. You can keep spinning until you hit TRY AGAIN or WINNER.");
+      }
+    }, 5600);
+  };
+
+  const winnersCount = players.filter((p) => p.status === "winner").length;
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_#14532d_0%,_#052e16_45%,_#02140a_100%)] text-white">
+      <div className="pointer-events-none absolute inset-0 opacity-25">
+        <motion.div
+          className="absolute left-[-80px] top-24 h-72 w-72 rounded-full bg-emerald-400/20 blur-3xl"
+          animate={{ y: [0, -20, 0], x: [0, 15, 0] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute right-[-60px] top-40 h-80 w-80 rounded-full bg-yellow-300/15 blur-3xl"
+          animate={{ y: [0, 22, 0], x: [0, -18, 0] }}
+          transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-10 left-[8%] h-56 w-56 rounded-full bg-red-400/10 blur-3xl"
+          animate={{ y: [0, 18, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-10 right-[10%] h-56 w-56 rounded-full bg-emerald-300/10 blur-3xl"
+          animate={{ y: [0, -16, 0] }}
+          transition={{ duration: 7.8, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6 py-8 md:px-10 md:py-12">
+        <div className="grid gap-8 xl:grid-cols-[0.9fr_1.1fr] xl:items-start">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="space-y-6"
+          >
+            <Badge className="rounded-full border border-white/20 bg-white/10 px-4 py-1 text-sm font-medium text-white hover:bg-white/10">
+              Premium Event Giveaway
+            </Badge>
+
+            <div className="space-y-4">
+              <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
+                Beautiful spin wheel
+                <span className="block bg-gradient-to-r from-yellow-300 via-emerald-200 to-green-300 bg-clip-text text-transparent">
+                  with one true winner.
+                </span>
+              </h1>
+              <p className="max-w-2xl text-base text-emerald-50/85 md:text-lg">
+                Enter your name, spin the 50-sector wheel, and only the golden WINNER sector earns the real gift.
+                This device can keep spinning unless it already landed on WINNER.
+              </p>
+            </div>
+
+            <Card className="rounded-[28px] border-white/10 bg-white/8 text-white shadow-2xl backdrop-blur-xl">
+              <CardHeader>
+                <CardTitle className="text-2xl">Enter player name</CardTitle>
+                <CardDescription className="text-white/65">
+                  One device keeps its own progress and winner status.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="Type player name here"
+                  className="h-12 rounded-2xl border-white/15 bg-black/20 text-white placeholder:text-white/35"
+                />
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    onClick={spinWheel}
+                    disabled={!canSpin}
+                    className="h-12 rounded-full bg-yellow-300 px-8 text-base font-bold text-green-950 shadow-lg hover:bg-yellow-200 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSpinning ? "Spinning..." : "Spin Now"}
+                  </Button>
+                  <div className="flex items-center rounded-full border border-white/10 bg-white/5 px-4 text-sm text-white/75">
+                    <RotateCw className="mr-2 h-4 w-4" />
+                    {currentPlayer?.status === "winner"
+                      ? "This device has already won"
+                      : hasRegistered
+                        ? "This device can still play"
+                        : "Register name first"}
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/15 p-4 text-sm text-white/80">
+                  {message}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Card className="rounded-3xl border-white/10 bg-white/8 text-white shadow-2xl backdrop-blur-md">
+                <CardContent className="flex items-center gap-3 p-5">
+                  <Users className="h-5 w-5 text-emerald-200" />
+                  <div>
+                    <div className="text-sm font-semibold">People Played</div>
+                    <div className="text-xs text-white/70">{players.length} registered devices</div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="rounded-3xl border-white/10 bg-white/8 text-white shadow-2xl backdrop-blur-md">
+                <CardContent className="flex items-center gap-3 p-5">
+                  <Sparkles className="h-5 w-5 text-yellow-300" />
+                  <div>
+                    <div className="text-sm font-semibold">Total Spins</div>
+                    <div className="text-xs text-white/70">{totalSpins} spins updated live</div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="rounded-3xl border-white/10 bg-white/8 text-white shadow-2xl backdrop-blur-md">
+                <CardContent className="flex items-center gap-3 p-5">
+                  <Crown className="h-5 w-5 text-yellow-300" />
+                  <div>
+                    <div className="text-sm font-semibold">Winners</div>
+                    <div className="text-xs text-white/70">{winnersCount} device{winnersCount === 1 ? "" : "s"} won</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7 }}
+            className="relative"
+          >
+            <div className="relative mx-auto flex max-w-[760px] flex-col items-center rounded-[34px] border border-white/10 bg-white/8 p-5 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl md:p-8">
+              <div className="pointer-events-none absolute inset-0 rounded-[34px] bg-gradient-to-b from-white/10 to-transparent" />
+
+              <div className="relative mb-6 flex flex-col items-center text-center">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-yellow-300/30 bg-yellow-300/10 px-4 py-1 text-sm text-yellow-100">
+                  <PartyPopper className="h-4 w-4" /> 50 Sector Lucky Wheel
+                </div>
+                <h2 className="text-2xl font-bold md:text-3xl">Only the golden slice wins</h2>
+                <p className="mt-2 max-w-md text-sm text-white/70">
+                  Golden = WINNER, Green = TRY AGAIN, Red = NICE TRY.
+                </p>
+              </div>
+
+              <div className="relative mb-6 flex items-center justify-center">
+                <div className="absolute -top-5 z-20 h-0 w-0 border-l-[18px] border-r-[18px] border-t-[34px] border-l-transparent border-r-transparent border-t-yellow-300 drop-shadow-xl" />
+
+                <motion.div
+                  animate={{ rotate: rotation }}
+                  transition={{ duration: 5.6, ease: [0.12, 0.85, 0.18, 1] }}
+                  className="relative"
+                  style={{ width: WHEEL_SIZE, height: WHEEL_SIZE }}
+                >
+                  <svg width={WHEEL_SIZE} height={WHEEL_SIZE} viewBox={`0 0 ${WHEEL_SIZE} ${WHEEL_SIZE}`}>
+                    <defs>
+                      {wheelSegments.map((segment) => (
+                        <linearGradient key={segment.index} id={`grad-${segment.index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor={segment.c1} />
+                          <stop offset="100%" stopColor={segment.c2} />
+                        </linearGradient>
+                      ))}
+                    </defs>
+
+                    <circle cx={CENTER} cy={CENTER} r={240} fill="rgba(255,255,255,0.08)" />
+                    <circle cx={CENTER} cy={CENTER} r={232} fill="#0b1f13" stroke="rgba(255,255,255,0.18)" strokeWidth="8" />
+
+                    {wheelSegments.map((segment) => (
+                      <g key={segment.index}>
+                        <path d={segment.path} fill={segment.fill} stroke="rgba(255,255,255,0.22)" strokeWidth="1.2" />
+                        <g transform={`translate(${segment.textPoint.x}, ${segment.textPoint.y}) rotate(${segment.midAngle})`}>
+                          <text textAnchor="middle" fill="white" fontSize="11" fontWeight="800" transform="rotate(90)">
+                            {segment.icon}
+                          </text>
+                          <text
+                            textAnchor="middle"
+                            fill="white"
+                            fontSize="7.5"
+                            fontWeight="800"
+                            letterSpacing="0.06em"
+                            transform="translate(0, 14) rotate(90)"
+                          >
+                            {segment.label}
+                          </text>
+                        </g>
+                      </g>
+                    ))}
+
+                    <circle cx={CENTER} cy={CENTER} r={54} fill="#f8fafc" />
+                    <circle cx={CENTER} cy={CENTER} r={40} fill="#14532d" />
+                    <text x={CENTER} y={CENTER + 5} textAnchor="middle" fill="white" fontSize="13" fontWeight="800">
+                      PLAY
+                    </text>
+                  </svg>
+                </motion.div>
+              </div>
+
+              <div className="grid w-full gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+                <Card className="rounded-[28px] border-white/10 bg-black/15 text-white backdrop-blur-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                      <Gift className="h-5 w-5 text-yellow-300" /> Result
+                    </CardTitle>
+                    <CardDescription className="text-white/60">
+                      The winner sector shows only a gift box visual.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {!result && (
+                      <div className="rounded-3xl border border-dashed border-white/15 bg-black/10 p-6 text-center text-white/70">
+                        Spin the wheel to reveal the result.
+                      </div>
+                    )}
+
+                    {result?.type === "winner" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-3xl border border-yellow-300/30 bg-gradient-to-br from-yellow-300/20 via-emerald-300/10 to-green-500/10 p-6 text-center"
+                      >
+                        {giftBox()}
+                        <h3 className="mt-4 text-2xl font-bold text-yellow-100">Winner!</h3>
+                        <p className="mt-2 text-white/80">
+                          Show this winning screen to the event team to receive the physical gift.
+                        </p>
+                      </motion.div>
+                    )}
+
+                    {result?.type === "tryAgain" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-3xl border border-emerald-300/20 bg-gradient-to-br from-emerald-400/15 to-green-400/10 p-6 text-center"
+                      >
+                        <div className="mb-3 text-5xl">🔄</div>
+                        <h3 className="text-2xl font-bold">Try Again</h3>
+                        <p className="mt-2 text-white/75">Good news — this result lets you spin again from this device.</p>
+                      </motion.div>
+                    )}
+
+                    {result?.type === "niceTry" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-3xl border border-red-300/15 bg-gradient-to-br from-red-500/15 to-rose-500/10 p-6 text-center"
+                      >
+                        <div className="mb-3 text-5xl">❤️</div>
+                        <h3 className="text-2xl font-bold">Nice Try</h3>
+                        <p className="mt-2 text-white/75">Not the winner yet. Keep playing and go for the golden sector.</p>
+                      </motion.div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <div className="space-y-6">
+                  <Card className="rounded-[28px] border-white/10 bg-black/15 text-white backdrop-blur-lg">
+                    <CardHeader>
+                      <CardTitle className="text-xl">Live event stats</CardTitle>
+                      <CardDescription className="text-white/60">
+                        Updated below as people play.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-3 sm:grid-cols-3">
+                      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+                        <div className="text-2xl font-black text-yellow-200">{totalSpins}</div>
+                        <div className="mt-1 text-xs uppercase tracking-[0.15em] text-white/55">Total Spins</div>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+                        <div className="text-2xl font-black text-emerald-200">{players.length}</div>
+                        <div className="mt-1 text-xs uppercase tracking-[0.15em] text-white/55">Players</div>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
+                        <div className="text-2xl font-black text-rose-200">{winnerName || "—"}</div>
+                        <div className="mt-1 text-xs uppercase tracking-[0.15em] text-white/55">Current Winner</div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="rounded-[28px] border-white/10 bg-black/15 text-white backdrop-blur-lg">
+                    <CardHeader>
+                      <CardTitle className="text-xl">Players who have played</CardTitle>
+                      <CardDescription className="text-white/60">
+                        Showing names and whether they have won yet.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="max-h-[300px] space-y-3 overflow-auto pr-1">
+                        {players.length === 0 && (
+                          <div className="rounded-2xl border border-dashed border-white/15 bg-black/10 p-5 text-center text-white/60">
+                            No players yet.
+                          </div>
+                        )}
+                        {players.map((player) => (
+                          <div
+                            key={player.id}
+                            className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+                          >
+                            <div>
+                              <div className="font-semibold">{player.name}</div>
+                              <div className="text-xs text-white/55">{player.spins} spin{player.spins === 1 ? "" : "s"}</div>
+                            </div>
+                            <div
+                              className={`rounded-full px-3 py-1 text-xs font-bold tracking-[0.08em] ${
+                                player.status === "winner"
+                                  ? "bg-yellow-300/20 text-yellow-100"
+                                  : "bg-white/10 text-white/75"
+                              }`}
+                            >
+                              {player.status === "winner" ? "WON" : "NOT WON YET"}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+}
