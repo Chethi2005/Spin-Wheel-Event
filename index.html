@@ -558,7 +558,7 @@
         <div class="hero-header">
           <div class="badge" style="margin-bottom: 6px;">50 Sector Lucky Wheel</div>
           <h2>Only the golden slice wins</h2>
-          <p>Golden = WINNER, Green = TRY AGAIN, Red = NICE TRY.</p>
+          <p>Golden = WINNER, Red = NICE TRY.</p>
         </div>
 
         <div class="wheel-wrap">
@@ -578,7 +578,7 @@
             <div class="message" id="messageBox">Enter your name to begin.</div>
             <div class="legend">
               <div class="legend-item"><span class="dot" style="background: linear-gradient(180deg, #c98b16, #ffdb75);"></span> WINNER</div>
-              <div class="legend-item"><span class="dot" style="background: linear-gradient(180deg, #0e6b35, #48db78);"></span> TRY AGAIN</div>
+              
               <div class="legend-item"><span class="dot" style="background: linear-gradient(180deg, #8f1e1e, #ff5656);"></span> NICE TRY</div>
             </div>
           </div>
@@ -631,15 +631,13 @@
     const STORAGE_KEY = 'spin-wheel-event-state-v3';
     const DEVICE_KEY = 'spin-wheel-event-device-id-v1';
     const TOTAL_SECTORS = 50;
-    const WINNER_INDEX = 7;
-    const TRY_AGAIN_INDEX = 23;
+    const WINNER_INDEXES = [7, 23, 41];
     const WHEEL_SIZE = 540;
     const CENTER = WHEEL_SIZE / 2;
     const RADIUS = 226;
 
     const segments = Array.from({ length: TOTAL_SECTORS }, (_, index) => {
-      if (index === WINNER_INDEX) return { label: 'WINNER', type: 'winner', icon: '🎁' };
-      if (index === TRY_AGAIN_INDEX) return { label: 'TRY AGAIN', type: 'tryAgain', icon: '🔄' };
+      if (WINNER_INDEXES.includes(index)) return { label: 'WINNER', type: 'winner', icon: '🎁' };
       return { label: 'NICE TRY', type: 'niceTry', icon: '❤' };
     });
 
@@ -789,16 +787,7 @@
         return;
       }
 
-      if (type === 'tryAgain') {
-        resultBox.className = 'result-box try-again';
-        resultBox.innerHTML = `
-          <div style="font-size:56px; margin-bottom:8px;">🔄</div>
-          <h4>Try Again</h4>
-          <p>Good news — this result lets you spin again from this device.</p>
-        `;
-        return;
-      }
-
+      
       if (type === 'niceTry') {
         resultBox.className = 'result-box nice-try';
         resultBox.innerHTML = `
@@ -831,7 +820,6 @@
 
         let c1, c2;
         if (seg.type === 'winner') [c1, c2] = ['#b7791f', '#f6d365'];
-        else if (seg.type === 'tryAgain') [c1, c2] = ['#14532d', '#4ade80'];
         else [c1, c2] = ['#8f1e1e', '#ff5656'];
 
         const grad = ctx.createLinearGradient(0, 0, WHEEL_SIZE, WHEEL_SIZE);
@@ -926,9 +914,7 @@
 
         if (selectedSegment.type === 'winner') {
           setMessage('Congratulations! Only the golden WINNER sector gives the gift.');
-        } else if (selectedSegment.type === 'tryAgain') {
-          setMessage('TRY AGAIN landed. You can spin again from this same device.');
-        } else {
+        }  else {
           setMessage('NICE TRY landed. You can keep spinning and go for the golden sector.');
         }
 
