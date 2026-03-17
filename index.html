@@ -3,144 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Image Puzzle Challenge</title>
+<title>Purble Pairs Style Memory Game</title>
 <style>
 :root{
-  --bg1:#052e16;
-  --bg2:#02140a;
-  --panel:rgba(255,255,255,0.08);
-  --border:rgba(255,255,255,0.12);
-  --text:#f6fff7;
-  --muted:rgba(255,255,255,0.72);
+  --bg1:#f7b2d9;
+  --bg2:#d8a8ff;
+  --panel:#ffffffcc;
+  --panelBorder:#ffffff88;
+  --text:#40245c;
+  --muted:#6a5a7e;
+  --purple:#8b5cf6;
+  --purpleDark:#6d28d9;
+  --green:#34d399;
+  --yellow:#fde047;
+  --pink:#fb7185;
 }
 *{box-sizing:border-box}
 body{
   margin:0;
   font-family:Arial,sans-serif;
   color:var(--text);
-  background:radial-gradient(circle at top,#14532d 0%,#052e16 42%,#02140a 100%);
+  background:radial-gradient(circle at top,#ffd3ea 0%,#e9c1ff 40%,#cfa6ff 100%);
 }
 .container{
-  width:min(1280px,calc(100% - 24px));
+  width:min(1320px,calc(100% - 20px));
   margin:0 auto;
-  padding:24px 0 40px;
+  padding:18px 0 30px;
 }
-h1{margin:0;font-size:clamp(32px,5vw,56px);line-height:1.02}
-.lead{color:var(--muted);max-width:760px;line-height:1.6;margin:14px 0 0}
-.badge{display:inline-block;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid var(--border);margin-bottom:16px;font-size:13px}
-.grid{display:grid;grid-template-columns:0.95fr 1.05fr;gap:22px;align-items:start;margin-top:22px}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:28px;backdrop-filter:blur(12px);box-shadow:0 20px 60px rgba(0,0,0,0.28)}
-.section{padding:20px}
-.sub{margin:6px 0 16px;color:rgba(255,255,255,0.6);line-height:1.5}
-.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
-.info-box,.stat-box{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:16px}
-.info-box .label{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em}
-.info-box .value{font-weight:800}
-.input{width:100%;height:48px;border-radius:16px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.18);color:#fff;padding:0 14px;font-size:15px;outline:none}
-.input::placeholder{color:rgba(255,255,255,0.36)}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.btn{border:0;border-radius:999px;padding:13px 22px;font-weight:800;cursor:pointer}
-.btn-primary{background:linear-gradient(180deg,#fde047,#facc15);color:#14301a}
-.btn-secondary{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.12)}
-.btn:disabled{opacity:.58;cursor:not-allowed}
-.pill{padding:12px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);font-size:14px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.stat-num{font-size:28px;font-weight:900}
-.stat-label{margin-top:6px;color:rgba(255,255,255,0.56);text-transform:uppercase;letter-spacing:.12em;font-size:11px}
-#puzzleWrap{display:flex;justify-content:center;align-items:center}
-#puzzle{
-  width:min(92vw,520px);
-  height:min(92vw,520px);
+.topbar{
+  text-align:center;
+  margin-bottom:14px;
+}
+.badge{
+  display:inline-block;
+  padding:8px 14px;
+  border-radius:999px;
+  background:#ffffff8c;
+  border:1px solid #ffffffaa;
+  font-size:13px;
+  margin-bottom:10px;
+}
+h1{margin:0;font-size:clamp(28px,4.5vw,52px);line-height:1.03}
+.lead{max-width:860px;margin:12px auto 0;color:var(--muted);line-height:1.6}
+.layout{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:start;margin-top:18px}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--panelBorder);
+  border-radius:28px;
+  box-shadow:0 20px 60px rgba(104,58,148,.18);
+  backdrop-filter:blur(10px);
+}
+.section{padding:18px}
+.section h2{margin:0 0 6px;font-size:22px}
+.sub{margin:0 0 14px;color:var(--muted);line-height:1.5}
+.controls{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin-bottom:14px}
+.input{
+  width:100%;height:46px;border-radius:16px;border:1px solid #ffffffaa;background:#ffffffc7;color:var(--text);
+  padding:0 14px;font-size:15px;outline:none;
+}
+.btn{border:0;border-radius:999px;padding:12px 20px;font-weight:800;cursor:pointer}
+.btn-primary{background:linear-gradient(180deg,#fde047,#facc15);color:#4b2468}
+.btn-secondary{background:#ffffffcf;color:var(--text);border:1px solid #ffffffb8}
+.status-row,.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{
+  background:#ffffff96;border:1px solid #ffffffc0;border-radius:20px;padding:14px;text-align:center;
+}
+.stat .num{font-size:28px;font-weight:900}
+.stat .label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.board-wrap{
+  margin-top:16px;
+  background:linear-gradient(180deg,#9f67ff,#7c3aed);
+  border-radius:30px;
+  padding:16px;
+  border:6px solid #b48cff;
+  box-shadow:inset 0 0 0 3px #6d28d9;
+}
+#board{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  grid-template-rows:repeat(4,1fr);
-  gap:2px;
-  border-radius:22px;
-  overflow:hidden;
-  background:rgba(255,255,255,0.08);
-  border:1px solid rgba(255,255,255,0.1);
+  grid-template-columns:repeat(8,1fr);
+  gap:6px;
 }
-.tile{
-  background-image:url('https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg');
-  background-size:400% 400%;
-  background-repeat:no-repeat;
+.card{
+  aspect-ratio:1/1;
+  border-radius:12px;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:transform .35s ease;
   cursor:pointer;
+}
+.card.flipped,.card.matched{transform:rotateY(180deg)}
+.card-face{
+  position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;
   user-select:none;
-  transition:transform .15s ease;
 }
-.tile:hover{transform:scale(0.98)}
-.empty{
-  background:none;
-  background-color:rgba(255,255,255,0.04);
-  cursor:default;
+.card-back{
+  background:linear-gradient(180deg,#ece2ff,#d5c0ff);
+  border:2px solid #7c3aed;
+  box-shadow:inset 0 2px 0 #fff8;
 }
-#referenceImage{
-  width:min(100%,420px);
-  border-radius:22px;
-  border:1px solid rgba(255,255,255,0.12);
-  display:block;
-  margin:auto;
+.card-back .icon{font-size:30px;filter:drop-shadow(0 2px 0 rgba(255,255,255,.6))}
+.card-front{
+  transform:rotateY(180deg);
+  overflow:hidden;
+  background:#fff;
+  border:2px solid #7c3aed;
 }
+.card-front img{width:100%;height:100%;object-fit:cover;display:block}
+.card.matched .card-front{box-shadow:0 0 0 3px #34d399 inset}
+.side-grid{display:grid;gap:18px}
+.reference-box{display:grid;grid-template-columns:1fr 120px;gap:14px;align-items:center}
+.reference-box img{width:100%;max-width:380px;border-radius:22px;border:1px solid #fff;margin:auto;display:block}
+.mascot{
+  background:linear-gradient(180deg,#b18cff,#8b5cf6);
+  border-radius:24px;
+  padding:12px;
+  min-height:180px;
+  color:white;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+}
+.mascot-face{font-size:54px;margin-bottom:8px}
+.mascot small{opacity:.9;line-height:1.4}
 .leaderboard-list{max-height:420px;overflow:auto;padding-right:4px}
-.entry{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05);margin-bottom:10px}
+.entry{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1px solid #ffffffc0;background:#ffffff96;margin-bottom:10px}
 .entry-left{display:flex;gap:12px;align-items:center;text-align:left}
-.rank{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;background:rgba(250,204,21,0.16);color:#fff2b3}
+.rank{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;background:#fef3c7;color:#7c2d12}
 .name{font-weight:800}
-.meta{font-size:12px;color:rgba(255,255,255,0.58);margin-top:4px}
-.score{font-weight:900;color:#fde68a}
-.note{margin-top:16px;color:rgba(255,255,255,0.56);font-size:13px;line-height:1.5}
-.success{margin-top:12px;padding:14px;border-radius:18px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.2);display:none}
-@media (max-width:1000px){.grid{grid-template-columns:1fr}.info-grid,.stats{grid-template-columns:1fr}}
+.meta{font-size:12px;color:var(--muted);margin-top:4px}
+.score{font-weight:900;color:#7c3aed}
+.notice{margin-top:14px;padding:14px;border-radius:18px;background:#dcfce7;border:1px solid #86efac;color:#166534;display:none}
+@media (max-width:1080px){.layout{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.status-row,.stats{grid-template-columns:repeat(2,1fr)}.reference-box{grid-template-columns:1fr}}
+@media (max-width:700px){#board{grid-template-columns:repeat(6,1fr)}.controls{grid-template-columns:1fr}.status-row,.stats{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="badge">Puzzle Competition</div>
-  <h1>4×4 image puzzle challenge</h1>
-  <p class="lead">Complete the puzzle using the fewest moves and fastest time. The leaderboard ranks players by combined score, with moves shown clearly so you can decide the gift winner fairly.</p>
+  <div class="topbar">
+    <div class="badge">Purble Pairs Style Competition</div>
+    <h1>Memory matching challenge</h1>
+    <p class="lead">This version is fully converted into a Purble Pairs style memory game. Flip cards, match identical image tiles, and finish with the best combined score. Lower score is better.</p>
+  </div>
 
-  <div class="grid">
+  <div class="layout">
     <div class="panel section">
-      <h2 style="margin:0 0 6px">Play the puzzle</h2>
-      <p class="sub">Enter your name, shuffle the 4×4 image puzzle, then solve it. Your time, moves, and score will be saved when you finish.</p>
-      <input id="playerName" class="input" placeholder="Enter player name" maxlength="40">
-      <div class="actions">
-        <button id="shuffleBtn" class="btn btn-primary">Start / Shuffle</button>
+      <h2>Play the game</h2>
+      <p class="sub">Enter a player name, start the board, then flip two cards at a time to find matching image pieces.</p>
+
+      <div class="controls">
+        <input id="playerName" class="input" placeholder="Enter player name" maxlength="40">
+        <button id="startBtn" class="btn btn-primary">Start Game</button>
         <button id="resetBtn" class="btn btn-secondary">Reset Leaderboard</button>
-        <div class="pill" id="statusPill">Enter a name to start</div>
       </div>
 
-      <div class="info-grid">
-        <div class="info-box"><div class="label">Moves</div><div class="value" id="moves">0</div></div>
-        <div class="info-box"><div class="label">Time</div><div class="value" id="timer">00:00</div></div>
-        <div class="info-box"><div class="label">Score</div><div class="value" id="scoreLive">0</div></div>
+      <div class="status-row">
+        <div class="stat"><div class="num" id="moves">0</div><div class="label">Moves</div></div>
+        <div class="stat"><div class="num" id="matches">0</div><div class="label">Matches</div></div>
+        <div class="stat"><div class="num" id="timer">00:00</div><div class="label">Time</div></div>
+        <div class="stat"><div class="num" id="scoreLive">0</div><div class="label">Score</div></div>
       </div>
 
-      <div id="puzzleWrap" style="margin-top:18px">
-        <div id="puzzle"></div>
+      <div class="board-wrap">
+        <div id="board"></div>
       </div>
 
-      <div id="successBox" class="success"></div>
-      <div class="note">Score formula used here: <strong>moves + seconds</strong>. Lower is better. Leaderboard uses the lowest score first.</div>
+      <div id="notice" class="notice"></div>
     </div>
 
-    <div style="display:grid;gap:22px">
+    <div class="side-grid">
       <div class="panel section">
-        <h2 style="margin:0 0 6px">Reference image</h2>
-        <p class="sub">Players solve the puzzle by matching it to this full image.</p>
-        <img id="referenceImage" src="https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg" alt="Reference image">
+        <h2>Reference image</h2>
+        <p class="sub">All matched tiles come from this same image.</p>
+        <div class="reference-box">
+          <img src="https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg" alt="Reference image">
+          <div class="mascot">
+            <div class="mascot-face">🧠</div>
+            <strong>How to play</strong>
+            <small>Tap two cards. If the pictures match, they stay open. Clear all pairs to finish.</small>
+          </div>
+        </div>
       </div>
 
       <div class="panel section">
-        <h2 style="margin:0 0 6px">Leaderboard</h2>
+        <h2>Leaderboard</h2>
         <p class="sub">Top scores are saved with player name, moves, time, and combined score.</p>
         <div class="stats" style="margin-bottom:16px">
-          <div class="stat-box"><div class="stat-num" id="playersCount">0</div><div class="stat-label">Results Saved</div></div>
-          <div class="stat-box"><div class="stat-num" id="bestMoves">—</div><div class="stat-label">Best Moves</div></div>
-          <div class="stat-box"><div class="stat-num" id="bestScore">—</div><div class="stat-label">Best Score</div></div>
+          <div class="stat"><div class="num" id="playersCount">0</div><div class="label">Results Saved</div></div>
+          <div class="stat"><div class="num" id="bestMoves">—</div><div class="label">Best Moves</div></div>
+          <div class="stat"><div class="num" id="bestScore">—</div><div class="label">Best Score</div></div>
+          <div class="stat"><div class="num" id="bestTime">—</div><div class="label">Best Time</div></div>
         </div>
         <div class="leaderboard-list" id="leaderboardList">
-          <div class="entry"><div class="entry-left"><div class="rank">—</div><div><div class="name">No scores yet</div><div class="meta">Finish a puzzle to appear here.</div></div></div></div>
+          <div class="entry"><div class="entry-left"><div class="rank">—</div><div><div class="name">No scores yet</div><div class="meta">Finish a game to appear here.</div></div></div></div>
         </div>
       </div>
     </div>
@@ -148,113 +201,147 @@ h1{margin:0;font-size:clamp(32px,5vw,56px);line-height:1.02}
 </div>
 
 <script>
-const SIZE = 4;
-const TOTAL = SIZE * SIZE;
-const LEADERBOARD_KEY = 'image-puzzle-leaderboard-v1';
-let tiles = [];
+const LEADERBOARD_KEY = 'purble-pairs-style-v1';
+const IMAGE_URL = 'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg';
+const COLS = 8;
+const ROWS = 6;
+const TOTAL_CARDS = COLS * ROWS; // 48
+const TOTAL_PAIRS = TOTAL_CARDS / 2;
+const TILE_COLS = 4;
+const TILE_ROWS = 6; // 24 unique pieces
+
+let deck = [];
+let flipped = [];
+let matchedPairs = 0;
 let moves = 0;
 let seconds = 0;
 let timerInterval = null;
 let started = false;
-let completed = false;
+let lockBoard = false;
 let leaderboard = [];
 
-const puzzle = document.getElementById('puzzle');
+const board = document.getElementById('board');
 const movesEl = document.getElementById('moves');
+const matchesEl = document.getElementById('matches');
 const timerEl = document.getElementById('timer');
 const scoreLiveEl = document.getElementById('scoreLive');
 const playerNameInput = document.getElementById('playerName');
-const statusPill = document.getElementById('statusPill');
-const successBox = document.getElementById('successBox');
+const notice = document.getElementById('notice');
 
-document.getElementById('shuffleBtn').addEventListener('click', startGame);
+document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('resetBtn').addEventListener('click', resetLeaderboard);
 
-function initSolvedBoard() {
-  tiles = Array.from({ length: TOTAL }, (_, i) => i);
-  moves = 0;
-  seconds = 0;
-  started = false;
-  completed = false;
-  stopTimer();
-  updateStats();
-  render();
-}
-
-function render() {
-  puzzle.innerHTML = '';
-  tiles.forEach((num, index) => {
-    const div = document.createElement('div');
-    div.className = 'tile';
-    if (num === TOTAL - 1) {
-      div.classList.add('empty');
-    } else {
-      const col = num % SIZE;
-      const row = Math.floor(num / SIZE);
-      div.style.backgroundPosition = `${(col / (SIZE - 1)) * 100}% ${(row / (SIZE - 1)) * 100}%`;
+function makePieces() {
+  const pieces = [];
+  for (let row = 0; row < TILE_ROWS; row++) {
+    for (let col = 0; col < TILE_COLS; col++) {
+      const id = row * TILE_COLS + col;
+      pieces.push({
+        id,
+        x: (col / (TILE_COLS - 1)) * 100,
+        y: (row / (TILE_ROWS - 1)) * 100
+      });
     }
-    div.addEventListener('click', () => moveTile(index));
-    puzzle.appendChild(div);
-  });
+  }
+  return pieces;
 }
 
-function getValidMoves(emptyIndex) {
-  const row = Math.floor(emptyIndex / SIZE);
-  const col = emptyIndex % SIZE;
-  const valid = [];
-  if (col > 0) valid.push(emptyIndex - 1);
-  if (col < SIZE - 1) valid.push(emptyIndex + 1);
-  if (row > 0) valid.push(emptyIndex - SIZE);
-  if (row < SIZE - 1) valid.push(emptyIndex + SIZE);
-  return valid;
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function createDeck() {
+  const pieces = makePieces();
+  const doubled = [...pieces, ...pieces].map((piece, index) => ({
+    uid: index + '-' + Math.random().toString(36).slice(2, 8),
+    pairId: piece.id,
+    x: piece.x,
+    y: piece.y,
+    flipped: false,
+    matched: false
+  }));
+  deck = shuffleArray(doubled);
+}
+
+function renderBoard() {
+  board.innerHTML = '';
+  deck.forEach((card, index) => {
+    const cardEl = document.createElement('div');
+    cardEl.className = 'card' + (card.flipped ? ' flipped' : '') + (card.matched ? ' matched' : '');
+    cardEl.innerHTML = `
+      <div class="card-face card-back"><div class="icon">🍀</div></div>
+      <div class="card-face card-front">
+        <img src="${IMAGE_URL}" alt="tile" style="object-position:${card.x}% ${card.y}%">
+      </div>
+    `;
+    cardEl.addEventListener('click', () => flipCard(index));
+    board.appendChild(cardEl);
+  });
 }
 
 function startGame() {
   const name = playerNameInput.value.trim();
   if (!name) {
-    statusPill.textContent = 'Enter a name first';
+    showNotice('Enter a player name first.', false);
     return;
   }
-  initSolvedBoard();
-  shuffleBoard(300);
+  createDeck();
+  flipped = [];
+  matchedPairs = 0;
+  moves = 0;
+  seconds = 0;
   started = true;
-  completed = false;
-  successBox.style.display = 'none';
-  startTimer();
-  statusPill.textContent = 'Puzzle in progress';
-}
-
-function shuffleBoard(steps) {
-  let emptyIndex = tiles.indexOf(TOTAL - 1);
-  let previousIndex = -1;
-  for (let i = 0; i < steps; i++) {
-    const valid = getValidMoves(emptyIndex).filter(v => v !== previousIndex);
-    const chosen = valid[Math.floor(Math.random() * valid.length)];
-    [tiles[emptyIndex], tiles[chosen]] = [tiles[chosen], tiles[emptyIndex]];
-    previousIndex = emptyIndex;
-    emptyIndex = chosen;
-  }
-  if (isSolved()) shuffleBoard(40);
-  render();
-}
-
-function moveTile(index) {
-  if (!started || completed) return;
-  const emptyIndex = tiles.indexOf(TOTAL - 1);
-  const valid = getValidMoves(emptyIndex);
-  if (!valid.includes(index)) return;
-  [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
-  moves++;
+  lockBoard = false;
+  hideNotice();
   updateStats();
-  render();
-  if (isSolved()) finishGame();
+  renderBoard();
+  startTimer();
 }
 
-function isSolved() {
-  for (let i = 0; i < TOTAL; i++) {
-    if (tiles[i] !== i) return false;
+function flipCard(index) {
+  if (!started || lockBoard) return;
+  const card = deck[index];
+  if (card.flipped || card.matched) return;
+
+  card.flipped = true;
+  flipped.push(index);
+  renderBoard();
+
+  if (flipped.length === 2) {
+    moves++;
+    updateStats();
+    checkMatch();
   }
-  return true;
+}
+
+function checkMatch() {
+  lockBoard = true;
+  const [aIndex, bIndex] = flipped;
+  const a = deck[aIndex];
+  const b = deck[bIndex];
+
+  if (a.pairId === b.pairId) {
+    a.matched = true;
+    b.matched = true;
+    matchedPairs++;
+    flipped = [];
+    lockBoard = false;
+    updateStats();
+    renderBoard();
+    if (matchedPairs === TOTAL_PAIRS) finishGame();
+  } else {
+    setTimeout(() => {
+      a.flipped = false;
+      b.flipped = false;
+      flipped = [];
+      lockBoard = false;
+      renderBoard();
+    }, 700);
+  }
 }
 
 function startTimer() {
@@ -282,12 +369,12 @@ function getScore() {
 
 function updateStats() {
   movesEl.textContent = moves;
+  matchesEl.textContent = matchedPairs + '/' + TOTAL_PAIRS;
   timerEl.textContent = formatTime(seconds);
   scoreLiveEl.textContent = getScore();
 }
 
 function finishGame() {
-  completed = true;
   started = false;
   stopTimer();
   const name = playerNameInput.value.trim();
@@ -302,9 +389,7 @@ function finishGame() {
   leaderboard.sort((a, b) => a.score - b.score || a.moves - b.moves || a.seconds - b.seconds || a.name.localeCompare(b.name));
   saveLeaderboard();
   renderLeaderboard();
-  statusPill.textContent = 'Puzzle completed';
-  successBox.style.display = 'block';
-  successBox.innerHTML = `<strong>Finished!</strong> ${escapeHtml(name)} completed the puzzle in <strong>${moves}</strong> moves and <strong>${formatTime(seconds)}</strong>. Combined score: <strong>${getScore()}</strong>.`;
+  showNotice(`${escapeHtml(name)} finished the game in ${moves} moves and ${formatTime(seconds)}. Combined score: ${getScore()}.`, true);
 }
 
 function loadLeaderboard() {
@@ -327,13 +412,15 @@ function renderLeaderboard() {
   const playersCount = document.getElementById('playersCount');
   const bestMoves = document.getElementById('bestMoves');
   const bestScore = document.getElementById('bestScore');
+  const bestTime = document.getElementById('bestTime');
 
   playersCount.textContent = leaderboard.length;
   bestMoves.textContent = leaderboard.length ? leaderboard[0].moves : '—';
   bestScore.textContent = leaderboard.length ? leaderboard[0].score : '—';
+  bestTime.textContent = leaderboard.length ? formatTime(leaderboard[0].seconds) : '—';
 
   if (!leaderboard.length) {
-    box.innerHTML = '<div class=\"entry\"><div class=\"entry-left\"><div class=\"rank\">—</div><div><div class=\"name\">No scores yet</div><div class=\"meta\">Finish a puzzle to appear here.</div></div></div></div>';
+    box.innerHTML = '<div class="entry"><div class="entry-left"><div class="rank">—</div><div><div class="name">No scores yet</div><div class="meta">Finish a game to appear here.</div></div></div></div>';
     return;
   }
 
@@ -359,18 +446,31 @@ function resetLeaderboard() {
   renderLeaderboard();
 }
 
+function showNotice(text, success) {
+  notice.style.display = 'block';
+  notice.style.background = success ? '#dcfce7' : '#fee2e2';
+  notice.style.borderColor = success ? '#86efac' : '#fca5a5';
+  notice.style.color = success ? '#166534' : '#991b1b';
+  notice.textContent = text;
+}
+
+function hideNotice() {
+  notice.style.display = 'none';
+}
+
 function escapeHtml(text) {
   return String(text)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
-    .replaceAll('\"', '&quot;')
-    .replaceAll(\"'\", '&#039;');
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 
 loadLeaderboard();
 renderLeaderboard();
-initSolvedBoard();
+updateStats();
+renderBoard();
 </script>
 </body>
 </html>
