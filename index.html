@@ -1,942 +1,366 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spin Wheel Event</title>
-  <style>
-    :root {
-      --bg1: #03140b;
-      --bg2: #0a2d17;
-      --panel: rgba(255,255,255,0.08);
-      --panel-border: rgba(255,255,255,0.12);
-      --text: #f6fff7;
-      --muted: rgba(255,255,255,0.72);
-      --gold1: #c98b16;
-      --gold2: #ffdb75;
-      --green1: #0e6b35;
-      --green2: #48db78;
-      --red1: #8f1e1e;
-      --red2: #ff5656;
-      --shadow: 0 20px 60px rgba(0,0,0,0.35);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Inter, Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top, #14532d 0%, #052e16 42%, #02140a 100%),
-        linear-gradient(180deg, #03140b, #03140b);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(70px);
-      opacity: 0.22;
-      z-index: 0;
-      animation: float 9s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    .orb.one { width: 280px; height: 280px; left: -70px; top: 80px; background: #34d399; }
-    .orb.two { width: 300px; height: 300px; right: -70px; top: 110px; background: #fde047; animation-delay: 1.4s; }
-    .orb.three { width: 240px; height: 240px; left: 8%; bottom: 60px; background: #fb7185; animation-delay: 2.1s; }
-    .orb.four { width: 220px; height: 220px; right: 10%; bottom: 70px; background: #4ade80; animation-delay: 3s; }
-
-    @keyframes float {
-      0%,100% { transform: translateY(0) translateX(0); }
-      50% { transform: translateY(-16px) translateX(12px); }
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
-      width: min(1280px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 28px 0 40px;
-    }
-
-    .top-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.1fr;
-      gap: 26px;
-      align-items: start;
-    }
-
-    .badge {
-      display: inline-flex;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.15);
-      font-size: 13px;
-      color: #f7fff9;
-      margin-bottom: 16px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(34px, 5vw, 62px);
-      line-height: 1.02;
-      letter-spacing: -0.03em;
-    }
-
-    .gradient-title {
-      display: block;
-      background: linear-gradient(90deg, #fde047, #d1fae5, #86efac);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .lead {
-      color: var(--muted);
-      font-size: 17px;
-      line-height: 1.65;
-      max-width: 760px;
-      margin-top: 16px;
-    }
-
-    .cards-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-top: 22px;
-    }
-
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--panel-border);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
-    }
-
-    .mini-card {
-      padding: 18px;
-      min-height: 88px;
-    }
-
-    .mini-card .label {
-      font-size: 13px;
-      color: rgba(255,255,255,0.65);
-      margin-bottom: 6px;
-    }
-
-    .mini-card .value {
-      font-weight: 700;
-      font-size: 16px;
-    }
-
-    .hero-panel {
-      padding: 22px;
-    }
-
-    .hero-header {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-
-    .hero-header h2 {
-      margin: 8px 0 0;
-      font-size: 32px;
-    }
-
-    .hero-header p {
-      color: var(--muted);
-      margin: 10px auto 0;
-      max-width: 440px;
-      line-height: 1.5;
-    }
-
-    .wheel-wrap {
-      position: relative;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding-top: 12px;
-      padding-bottom: 10px;
-    }
-
-    .pointer {
-      position: absolute;
-      top: -4px;
-      z-index: 3;
-      width: 0;
-      height: 0;
-      border-left: 18px solid transparent;
-      border-right: 18px solid transparent;
-      border-top: 34px solid #fde047;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
-    }
-
-    #wheelCanvas {
-      width: min(92vw, 540px);
-      height: min(92vw, 540px);
-      max-width: 540px;
-      max-height: 540px;
-      transition: transform 5.7s cubic-bezier(.12,.85,.18,1);
-      display: block;
-      filter: drop-shadow(0 24px 40px rgba(0,0,0,0.24));
-    }
-
-    .control-grid {
-      display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
-      gap: 18px;
-      margin-top: 18px;
-    }
-
-    .section {
-      padding: 20px;
-    }
-
-    .section h3 {
-      margin: 0 0 6px;
-      font-size: 24px;
-    }
-
-    .section p.sub {
-      margin: 0 0 16px;
-      color: rgba(255,255,255,0.62);
-      line-height: 1.45;
-      font-size: 14px;
-    }
-
-    .input {
-      width: 100%;
-      height: 48px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(0,0,0,0.18);
-      color: white;
-      padding: 0 16px;
-      font-size: 15px;
-      outline: none;
-    }
-
-    .input::placeholder { color: rgba(255,255,255,0.38); }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 14px;
-      align-items: center;
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 999px;
-      padding: 14px 24px;
-      cursor: pointer;
-      font-weight: 800;
-      font-size: 15px;
-      transition: 0.2s ease;
-    }
-
-    .btn:hover { transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.58; cursor: not-allowed; transform: none; }
-
-    .btn-primary {
-      background: linear-gradient(180deg, #fde047, #facc15);
-      color: #14301a;
-      box-shadow: 0 12px 24px rgba(250,204,21,0.22);
-    }
-
-    .pill {
-      padding: 12px 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.8);
-      font-size: 14px;
-    }
-
-    .message {
-      margin-top: 14px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(0,0,0,0.16);
-      padding: 14px 16px;
-      color: rgba(255,255,255,0.86);
-      line-height: 1.5;
-      min-height: 52px;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .stat-box {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .stat-num {
-      font-weight: 900;
-      font-size: clamp(22px, 3vw, 28px);
-    }
-
-    .stat-label {
-      margin-top: 6px;
-      color: rgba(255,255,255,0.56);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-size: 11px;
-    }
-
-    .result-box {
-      border-radius: 24px;
-      padding: 22px;
-      min-height: 240px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      text-align: center;
-      background: rgba(0,0,0,0.14);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .result-placeholder {
-      color: rgba(255,255,255,0.68);
-    }
-
-    .result-box h4 {
-      font-size: 30px;
-      margin: 14px 0 8px;
-    }
-
-    .result-box p {
-      color: rgba(255,255,255,0.78);
-      line-height: 1.6;
-      margin: 0;
-    }
-
-    .winner {
-      background: linear-gradient(135deg, rgba(250,204,21,0.18), rgba(52,211,153,0.08));
-      border-color: rgba(250,204,21,0.25);
-    }
-
-    .try-again {
-      background: linear-gradient(135deg, rgba(74,222,128,0.16), rgba(34,197,94,0.05));
-      border-color: rgba(74,222,128,0.2);
-    }
-
-    .nice-try {
-      background: linear-gradient(135deg, rgba(239,68,68,0.14), rgba(244,63,94,0.06));
-      border-color: rgba(239,68,68,0.18);
-    }
-
-    .gift {
-      position: relative;
-      width: 112px;
-      height: 112px;
-      margin: 0 auto;
-      animation: bounceGift 2.1s ease-in-out infinite;
-    }
-
-    .gift-lid {
-      position: absolute;
-      left: 8px;
-      right: 8px;
-      top: 22px;
-      height: 22px;
-      border-radius: 16px 16px 8px 8px;
-      background: linear-gradient(180deg, #fff0a8, #f4ca3c);
-    }
-
-    .gift-box {
-      position: absolute;
-      left: 18px;
-      right: 18px;
-      top: 40px;
-      bottom: 10px;
-      border-radius: 0 0 22px 22px;
-      background: linear-gradient(180deg, #ffe17a, #dba31a);
-      box-shadow: 0 18px 28px rgba(0,0,0,0.18);
-    }
-
-    .gift-ribbon-v {
-      position: absolute;
-      top: 22px;
-      bottom: 10px;
-      left: 50%;
-      width: 10px;
-      transform: translateX(-50%);
-      background: #0f7a45;
-      border-radius: 10px;
-    }
-
-    .gift-ribbon-h {
-      position: absolute;
-      left: 14px;
-      right: 14px;
-      top: 56px;
-      height: 10px;
-      background: #0f7a45;
-      border-radius: 10px;
-    }
-
-    .gift-bow-left,
-    .gift-bow-right {
-      position: absolute;
-      top: 0;
-      width: 32px;
-      height: 32px;
-      border: 7px solid #0f7a45;
-      border-bottom-color: transparent;
-      border-radius: 50%;
-    }
-
-    .gift-bow-left {
-      left: 24px;
-      transform: rotate(-24deg);
-      border-right-color: transparent;
-    }
-
-    .gift-bow-right {
-      right: 24px;
-      transform: rotate(24deg);
-      border-left-color: transparent;
-    }
-
-    .spark {
-      position: absolute;
-      font-size: 24px;
-      animation: sparkle 1.7s ease-in-out infinite;
-    }
-
-    .spark.one { top: -8px; right: -8px; }
-    .spark.two { left: -6px; top: 10px; animation-delay: 0.24s; }
-
-    @keyframes bounceGift {
-      0%,100% { transform: translateY(0) rotate(0deg); }
-      25% { transform: translateY(-6px) rotate(-2deg); }
-      75% { transform: translateY(-2px) rotate(2deg); }
-    }
-
-    @keyframes sparkle {
-      0%,100% { transform: translateY(0) scale(1); opacity: 0.8; }
-      50% { transform: translateY(-8px) scale(1.15); opacity: 1; }
-    }
-
-    .players-list {
-      max-height: 320px;
-      overflow: auto;
-      padding-right: 4px;
-    }
-
-    .player-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 15px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.05);
-      margin-bottom: 10px;
-    }
-
-    .player-name {
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .player-meta {
-      color: rgba(255,255,255,0.55);
-      font-size: 12px;
-    }
-
-    .status-tag {
-      white-space: nowrap;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: 0.08em;
-    }
-
-    .won { background: rgba(250,204,21,0.18); color: #fff7c9; }
-    .not-won { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.78); }
-
-    .legend {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 13px;
-      color: rgba(255,255,255,0.84);
-    }
-
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .footer-note {
-      margin-top: 18px;
-      font-size: 13px;
-      color: rgba(255,255,255,0.54);
-      line-height: 1.5;
-    }
-
-    @media (max-width: 1040px) {
-      .top-grid, .control-grid { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 760px) {
-      .container { width: min(100% - 18px, 1280px); }
-      .cards-row, .stats { grid-template-columns: 1fr; }
-      .hero-panel, .section { padding: 16px; }
-      .hero-header h2 { font-size: 26px; }
-      .result-box { min-height: 210px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Puzzle Challenge</title>
+<style>
+:root{
+  --bg1:#052e16;
+  --bg2:#02140a;
+  --panel:rgba(255,255,255,0.08);
+  --border:rgba(255,255,255,0.12);
+  --text:#f6fff7;
+  --muted:rgba(255,255,255,0.72);
+  --gold:#facc15;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  color:var(--text);
+  background:radial-gradient(circle at top,#14532d 0%,#052e16 42%,#02140a 100%);
+}
+.container{
+  width:min(1280px,calc(100% - 24px));
+  margin:0 auto;
+  padding:24px 0 40px;
+}
+h1{margin:0;font-size:clamp(32px,5vw,56px);line-height:1.02}
+.lead{color:var(--muted);max-width:760px;line-height:1.6;margin:14px 0 0}
+.badge{display:inline-block;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.08);border:1px solid var(--border);margin-bottom:16px;font-size:13px}
+.grid{display:grid;grid-template-columns:0.95fr 1.05fr;gap:22px;align-items:start;margin-top:22px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:28px;backdrop-filter:blur(12px);box-shadow:0 20px 60px rgba(0,0,0,0.28)}
+.section{padding:20px}
+.sub{margin:6px 0 16px;color:rgba(255,255,255,0.6);line-height:1.5}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.info-box,.stat-box{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:16px}
+.info-box .label{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em}
+.info-box .value{font-weight:800}
+.input{width:100%;height:48px;border-radius:16px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.18);color:#fff;padding:0 14px;font-size:15px;outline:none}
+.input::placeholder{color:rgba(255,255,255,0.36)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn{border:0;border-radius:999px;padding:13px 22px;font-weight:800;cursor:pointer}
+.btn-primary{background:linear-gradient(180deg,#fde047,#facc15);color:#14301a}
+.btn-secondary{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.12)}
+.btn:disabled{opacity:.58;cursor:not-allowed}
+.pill{padding:12px 14px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat-num{font-size:28px;font-weight:900}
+.stat-label{margin-top:6px;color:rgba(255,255,255,0.56);text-transform:uppercase;letter-spacing:.12em;font-size:11px}
+#puzzleWrap{display:flex;justify-content:center;align-items:center}
+#puzzle{
+  width:min(92vw,520px);
+  height:min(92vw,520px);
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  grid-template-rows:repeat(5,1fr);
+  gap:2px;
+  border-radius:22px;
+  overflow:hidden;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.1);
+}
+.tile{
+  background-image:url('https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg');
+  background-size:500% 500%;
+  cursor:pointer;
+  user-select:none;
+  transition:transform .15s ease;
+}
+.tile:hover{transform:scale(0.98)}
+.empty{background:none;background-color:rgba(255,255,255,0.04);cursor:default}
+#referenceImage{width:min(100%,420px);border-radius:22px;border:1px solid rgba(255,255,255,0.12);display:block;margin:auto}
+.leaderboard-list{max-height:420px;overflow:auto;padding-right:4px}
+.entry{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05);margin-bottom:10px}
+.entry-left{display:flex;gap:12px;align-items:center;text-align:left}
+.rank{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;background:rgba(250,204,21,0.16);color:#fff2b3}
+.name{font-weight:800}
+.meta{font-size:12px;color:rgba(255,255,255,0.58);margin-top:4px}
+.score{font-weight:900;color:#fde68a}
+.note{margin-top:16px;color:rgba(255,255,255,0.56);font-size:13px;line-height:1.5}
+.success{margin-top:12px;padding:14px;border-radius:18px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.2);display:none}
+@media (max-width:1000px){.grid{grid-template-columns:1fr}.info-grid,.stats{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div class="orb one"></div>
-  <div class="orb two"></div>
-  <div class="orb three"></div>
-  <div class="orb four"></div>
+<div class="container">
+  <div class="badge">Puzzle Competition</div>
+  <h1>5×5 image puzzle challenge</h1>
+  <p class="lead">Complete the puzzle using the fewest moves and fastest time. The leaderboard ranks players by combined score, with moves shown clearly so you can decide the gift winner fairly.</p>
 
-  <div class="container">
-    <div class="top-grid">
-      <div>
-        <div class="badge">Premium Event Giveaway</div>
-        <h1>
-          Beautiful spin wheel
-          <span class="gradient-title">with one true winner.</span>
-        </h1>
-        <div class="lead">
-          Enter the player name, spin the 50-sector wheel, and only the golden WINNER sector earns the real gift.
-          This single-file version works directly on GitHub and Vercel without React setup.
-        </div>
-
-        <div class="cards-row">
-          <div class="panel mini-card">
-            <div class="label">People Played</div>
-            <div class="value" id="peoplePlayedTop">0 registered devices</div>
-          </div>
-          <div class="panel mini-card">
-            <div class="label">Total Spins</div>
-            <div class="value" id="totalSpinsTop">0 spins updated live</div>
-          </div>
-          <div class="panel mini-card">
-            <div class="label">Current Winner</div>
-            <div class="value" id="currentWinnerTop">—</div>
-          </div>
-        </div>
+  <div class="grid">
+    <div class="panel section">
+      <h2 style="margin:0 0 6px">Play the puzzle</h2>
+      <p class="sub">Enter your name, shuffle the 5×5 image puzzle, then solve it. Your time, moves, and score will be saved when you finish.</p>
+      <input id="playerName" class="input" placeholder="Enter player name" maxlength="40">
+      <div class="actions">
+        <button id="shuffleBtn" class="btn btn-primary">Start / Shuffle</button>
+        <button id="resetBtn" class="btn btn-secondary">Reset Leaderboard</button>
+        <div class="pill" id="statusPill">Enter a name to start</div>
       </div>
 
-      <div class="panel hero-panel">
-        <div class="hero-header">
-          <div class="badge" style="margin-bottom: 6px;">50 Sector Lucky Wheel</div>
-          <h2>Only the golden slice wins</h2>
-          <p>Golden = WINNER, Red = NICE TRY.</p>
-        </div>
-
-        <div class="wheel-wrap">
-          <div class="pointer"></div>
-          <canvas id="wheelCanvas" width="540" height="540"></canvas>
-        </div>
-
-        <div class="control-grid">
-          <div class="panel section">
-            <h3>Enter player name</h3>
-            <p class="sub">One device keeps its own progress and winner status.</p>
-            <input class="input" id="playerName" placeholder="Type player name here" maxlength="40" />
-            <div class="actions">
-              <button class="btn btn-primary" id="spinBtn">Spin Now</button>
-              <div class="pill" id="deviceStatus">Register name first</div>
-            </div>
-            <div class="message" id="messageBox">Enter your name to begin.</div>
-            <div class="legend">
-              <div class="legend-item"><span class="dot" style="background: linear-gradient(180deg, #c98b16, #ffdb75);"></span> WINNER</div>
-              
-              <div class="legend-item"><span class="dot" style="background: linear-gradient(180deg, #8f1e1e, #ff5656);"></span> NICE TRY</div>
-            </div>
-          </div>
-
-          <div style="display:grid; gap:18px;">
-            <div class="panel section">
-              <h3>Live event stats</h3>
-              <p class="sub">Updated below as people play.</p>
-              <div class="stats">
-                <div class="stat-box">
-                  <div class="stat-num" id="totalSpins">0</div>
-                  <div class="stat-label">Total Spins</div>
-                </div>
-                <div class="stat-box">
-                  <div class="stat-num" id="playersCount">0</div>
-                  <div class="stat-label">Players</div>
-                </div>
-                <div class="stat-box">
-                  <div class="stat-num" id="winnerName">—</div>
-                  <div class="stat-label">Current Winner</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="panel section">
-              <h3>Result</h3>
-              <p class="sub">The winner sector shows only a gift box visual.</p>
-              <div id="resultBox" class="result-box">
-                <div class="result-placeholder">Spin the wheel to reveal the result.</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="info-grid">
+        <div class="info-box"><div class="label">Moves</div><div class="value" id="moves">0</div></div>
+        <div class="info-box"><div class="label">Time</div><div class="value" id="timer">00:00</div></div>
+        <div class="info-box"><div class="label">Score</div><div class="value" id="scoreLive">0</div></div>
       </div>
+
+      <div id="puzzleWrap" style="margin-top:18px">
+        <div id="puzzle"></div>
+      </div>
+
+      <div id="successBox" class="success"></div>
+      <div class="note">Score formula used here: <strong>moves + seconds</strong>. Lower is better. Leaderboard uses the lowest score first.</div>
     </div>
 
-    <div style="margin-top: 24px;" class="panel section">
-      <h3>Players who have played</h3>
-      <p class="sub">Showing names and whether they have won yet.</p>
-      <div class="players-list" id="playersList">
-        <div class="player-item"><div><div class="player-name">No players yet</div><div class="player-meta">Players will appear here after the first spin.</div></div></div>
+    <div style="display:grid;gap:22px">
+      <div class="panel section">
+        <h2 style="margin:0 0 6px">Reference image</h2>
+        <p class="sub">Players solve the puzzle by matching it to this full image.</p>
+        <img id="referenceImage" src="https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg" alt="Reference image">
       </div>
-      <div class="footer-note">
-        This version uses browser storage, so it works nicely for a quick event website. For full anti-cheat protection across all devices, the next step would be a real backend and database.
+
+      <div class="panel section">
+        <h2 style="margin:0 0 6px">Leaderboard</h2>
+        <p class="sub">Top scores are saved with player name, moves, time, and combined score.</p>
+        <div class="stats" style="margin-bottom:16px">
+          <div class="stat-box"><div class="stat-num" id="playersCount">0</div><div class="stat-label">Results Saved</div></div>
+          <div class="stat-box"><div class="stat-num" id="bestMoves">—</div><div class="stat-label">Best Moves</div></div>
+          <div class="stat-box"><div class="stat-num" id="bestScore">—</div><div class="stat-label">Best Score</div></div>
+        </div>
+        <div class="leaderboard-list" id="leaderboardList">
+          <div class="entry"><div class="entry-left"><div class="rank">—</div><div><div class="name">No scores yet</div><div class="meta">Finish a puzzle to appear here.</div></div></div></div>
+        </div>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    const STORAGE_KEY = 'spin-wheel-event-state-v3';
-    const DEVICE_KEY = 'spin-wheel-event-device-id-v1';
-    const TOTAL_SECTORS = 50;
-    const WINNER_INDEXES = [7, 23, 41];
-    const WHEEL_SIZE = 540;
-    const CENTER = WHEEL_SIZE / 2;
-    const RADIUS = 226;
+<script>
+const SIZE = 5;
+const TOTAL = SIZE * SIZE;
+const LEADERBOARD_KEY = 'image-puzzle-leaderboard-v1';
+let tiles = [];
+let moves = 0;
+let seconds = 0;
+let timerInterval = null;
+let started = false;
+let completed = false;
+let leaderboard = [];
 
-    const segments = Array.from({ length: TOTAL_SECTORS }, (_, index) => {
-      if (WINNER_INDEXES.includes(index)) return { label: 'WINNER', type: 'winner', icon: '🎁' };
-      return { label: 'NICE TRY', type: 'niceTry', icon: '❤' };
-    });
+const puzzle = document.getElementById('puzzle');
+const movesEl = document.getElementById('moves');
+const timerEl = document.getElementById('timer');
+const scoreLiveEl = document.getElementById('scoreLive');
+const playerNameInput = document.getElementById('playerName');
+const statusPill = document.getElementById('statusPill');
+const successBox = document.getElementById('successBox');
 
-    let state = {
-      players: [],
-      winnerName: null,
-      totalSpins: 0
-    };
+document.getElementById('shuffleBtn').addEventListener('click', startGame);
+document.getElementById('resetBtn').addEventListener('click', resetLeaderboard);
 
-    const wheelCanvas = document.getElementById('wheelCanvas');
-    const ctx = wheelCanvas.getContext('2d');
-    const spinBtn = document.getElementById('spinBtn');
-    const playerNameInput = document.getElementById('playerName');
-    const messageBox = document.getElementById('messageBox');
-    const resultBox = document.getElementById('resultBox');
-    const deviceStatus = document.getElementById('deviceStatus');
+function initSolvedBoard() {
+  tiles = Array.from({ length: TOTAL }, (_, i) => i);
+  moves = 0;
+  seconds = 0;
+  started = false;
+  completed = false;
+  stopTimer();
+  updateStats();
+  render();
+}
 
-    let rotation = 0;
-    let isSpinning = false;
-    const sliceAngle = 360 / TOTAL_SECTORS;
-    const deviceId = getDeviceId();
-
-    function getDeviceId() {
-      const saved = localStorage.getItem(DEVICE_KEY);
-      if (saved) return saved;
-      const created = 'device-' + Math.random().toString(36).slice(2, 10);
-      localStorage.setItem(DEVICE_KEY, created);
-      return created;
+function render() {
+  puzzle.innerHTML = '';
+  tiles.forEach((num, index) => {
+    const div = document.createElement('div');
+    div.className = 'tile';
+    if (num === TOTAL - 1) {
+      div.classList.add('empty');
+    } else {
+      const col = num % SIZE;
+      const row = Math.floor(num / SIZE);
+      div.style.backgroundPosition = `${(col / (SIZE - 1)) * 100}% ${(row / (SIZE - 1)) * 100}%`;
     }
+    div.addEventListener('click', () => moveTile(index));
+    puzzle.appendChild(div);
+  });
+}
 
-    function loadState() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      try {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') {
-          state.players = Array.isArray(parsed.players) ? parsed.players : [];
-          state.winnerName = parsed.winnerName || null;
-          state.totalSpins = Number(parsed.totalSpins || 0);
-        }
-      } catch (e) {}
-    }
+function getValidMoves(emptyIndex) {
+  const row = Math.floor(emptyIndex / SIZE);
+  const col = emptyIndex % SIZE;
+  const moves = [];
+  if (col > 0) moves.push(emptyIndex - 1);
+  if (col < SIZE - 1) moves.push(emptyIndex + 1);
+  if (row > 0) moves.push(emptyIndex - SIZE);
+  if (row < SIZE - 1) moves.push(emptyIndex + SIZE);
+  return moves;
+}
 
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
+function startGame() {
+  const name = playerNameInput.value.trim();
+  if (!name) {
+    statusPill.textContent = 'Enter a name first';
+    return;
+  }
+  initSolvedBoard();
+  shuffleBoard(300);
+  started = true;
+  completed = false;
+  successBox.style.display = 'none';
+  startTimer();
+  statusPill.textContent = 'Puzzle in progress';
+}
 
-    function getCurrentPlayer() {
-      return state.players.find(p => p.id === deviceId) || null;
-    }
+function shuffleBoard(steps) {
+  let emptyIndex = tiles.indexOf(TOTAL - 1);
+  let previousIndex = -1;
+  for (let i = 0; i < steps; i++) {
+    let valid = getValidMoves(emptyIndex).filter(v => v !== previousIndex);
+    const chosen = valid[Math.floor(Math.random() * valid.length)];
+    [tiles[emptyIndex], tiles[chosen]] = [tiles[chosen], tiles[emptyIndex]];
+    previousIndex = emptyIndex;
+    emptyIndex = chosen;
+  }
+  if (isSolved()) shuffleBoard(40);
+  render();
+}
 
-    function ensurePlayer(name) {
-      const trimmed = (name || '').trim();
-      if (!trimmed) return null;
-      let current = getCurrentPlayer();
-      if (current) {
-        current.name = trimmed;
-        return current;
-      }
-      current = {
-        id: deviceId,
-        name: trimmed,
-        spins: 0,
-        status: 'not_yet_won'
-      };
-      state.players.unshift(current);
-      return current;
-    }
+function moveTile(index) {
+  if (!started || completed) return;
+  const emptyIndex = tiles.indexOf(TOTAL - 1);
+  const valid = getValidMoves(emptyIndex);
+  if (!valid.includes(index)) return;
+  [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+  moves++;
+  updateStats();
+  render();
+  if (isSolved()) finishGame();
+}
 
-    function updateUI() {
-      const currentPlayer = getCurrentPlayer();
-      if (currentPlayer) {
-        playerNameInput.value = currentPlayer.name || '';
-      }
+function isSolved() {
+  for (let i = 0; i < TOTAL; i++) {
+    if (tiles[i] !== i) return false;
+  }
+  return true;
+}
 
-      document.getElementById('totalSpins').textContent = state.totalSpins;
-      document.getElementById('playersCount').textContent = state.players.length;
-      document.getElementById('winnerName').textContent = state.winnerName || '—';
+function startTimer() {
+  stopTimer();
+  timerInterval = setInterval(() => {
+    seconds++;
+    updateStats();
+  }, 1000);
+}
 
-      document.getElementById('peoplePlayedTop').textContent = `${state.players.length} registered device${state.players.length === 1 ? '' : 's'}`;
-      document.getElementById('totalSpinsTop').textContent = `${state.totalSpins} spin${state.totalSpins === 1 ? '' : 's'} updated live`;
-      document.getElementById('currentWinnerTop').textContent = state.winnerName || '—';
+function stopTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+}
 
-      if (currentPlayer && currentPlayer.status === 'winner') {
-        deviceStatus.textContent = 'This device has already won';
-      } else if (currentPlayer) {
-        deviceStatus.textContent = 'This device can still play';
-      } else {
-        deviceStatus.textContent = 'Register name first';
-      }
+function formatTime(totalSeconds) {
+  const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const s = String(totalSeconds % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
 
-      renderPlayers();
-      spinBtn.disabled = isSpinning || !playerNameInput.value.trim() || (currentPlayer && currentPlayer.status === 'winner');
-      saveState();
-    }
+function getScore() {
+  return moves + seconds;
+}
 
-    function renderPlayers() {
-      const list = document.getElementById('playersList');
-      if (!state.players.length) {
-        list.innerHTML = '<div class="player-item"><div><div class="player-name">No players yet</div><div class="player-meta">Players will appear here after the first spin.</div></div></div>';
-        return;
-      }
+function updateStats() {
+  movesEl.textContent = moves;
+  timerEl.textContent = formatTime(seconds);
+  scoreLiveEl.textContent = getScore();
+}
 
-      list.innerHTML = state.players.map(player => `
-        <div class="player-item">
-          <div>
-            <div class="player-name">${escapeHtml(player.name)}</div>
-            <div class="player-meta">${player.spins} spin${player.spins === 1 ? '' : 's'}</div>
-          </div>
-          <div class="status-tag ${player.status === 'winner' ? 'won' : 'not-won'}">
-            ${player.status === 'winner' ? 'WON' : 'NOT WON YET'}
-          </div>
+function finishGame() {
+  completed = true;
+  started = false;
+  stopTimer();
+  const name = playerNameInput.value.trim();
+  const result = {
+    name,
+    moves,
+    seconds,
+    score: getScore(),
+    completedAt: new Date().toISOString()
+  };
+  leaderboard.push(result);
+  leaderboard.sort((a, b) => a.score - b.score || a.moves - b.moves || a.seconds - b.seconds || a.name.localeCompare(b.name));
+  saveLeaderboard();
+  renderLeaderboard();
+  statusPill.textContent = 'Puzzle completed';
+  successBox.style.display = 'block';
+  successBox.innerHTML = `<strong>Finished!</strong> ${escapeHtml(name)} completed the puzzle in <strong>${moves}</strong> moves and <strong>${formatTime(seconds)}</strong>. Combined score: <strong>${getScore()}</strong>.`;
+}
+
+function loadLeaderboard() {
+  try {
+    const raw = localStorage.getItem(LEADERBOARD_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    leaderboard = Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    leaderboard = [];
+  }
+}
+
+function saveLeaderboard() {
+  localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboard));
+}
+
+function renderLeaderboard() {
+  const box = document.getElementById('leaderboardList');
+  const playersCount = document.getElementById('playersCount');
+  const bestMoves = document.getElementById('bestMoves');
+  const bestScore = document.getElementById('bestScore');
+
+  playersCount.textContent = leaderboard.length;
+  bestMoves.textContent = leaderboard.length ? leaderboard[0].moves : '—';
+  bestScore.textContent = leaderboard.length ? leaderboard[0].score : '—';
+
+  if (!leaderboard.length) {
+    box.innerHTML = '<div class="entry"><div class="entry-left"><div class="rank">—</div><div><div class="name">No scores yet</div><div class="meta">Finish a puzzle to appear here.</div></div></div></div>';
+    return;
+  }
+
+  box.innerHTML = leaderboard.slice(0, 20).map((item, idx) => `
+    <div class="entry">
+      <div class="entry-left">
+        <div class="rank">${idx + 1}</div>
+        <div>
+          <div class="name">${escapeHtml(item.name)}</div>
+          <div class="meta">Moves: ${item.moves} • Time: ${formatTime(item.seconds)}</div>
         </div>
-      `).join('');
-    }
+      </div>
+      <div class="score">${item.score}</div>
+    </div>
+  `).join('');
+}
 
-    function escapeHtml(text) {
-      return String(text)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
+function resetLeaderboard() {
+  const ok = confirm('Clear all saved leaderboard results?');
+  if (!ok) return;
+  leaderboard = [];
+  saveLeaderboard();
+  renderLeaderboard();
+}
 
-    function setMessage(text) {
-      messageBox.textContent = text;
-    }
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
 
-    function setResult(type) {
-      if (type === 'winner') {
-        resultBox.className = 'result-box winner';
-        resultBox.innerHTML = `
-          <div class="gift">
-            <div class="gift-lid"></div>
-            <div class="gift-box"></div>
-            <div class="gift-ribbon-v"></div>
-            <div class="gift-ribbon-h"></div>
-            <div class="gift-bow-left"></div>
-            <div class="gift-bow-right"></div>
-            <div class="spark one">✨</div>
-            <div class="spark two">🎉</div>
-          </div>
-          <h4>Winner!</h4>
-          <p>Show this winning screen to the event team to receive the physical gift.</p>
-        `;
-        return;
-      }
-
-      
-      if (type === 'niceTry') {
-        resultBox.className = 'result-box nice-try';
-        resultBox.innerHTML = `
-          <div style="font-size:56px; margin-bottom:8px;">❤</div>
-          <h4>Nice Try</h4>
-          <p>Not the winner yet. Keep playing and go for the golden sector.</p>
-        `;
-        return;
-      }
-
-      resultBox.className = 'result-box';
-      resultBox.innerHTML = '<div class="result-placeholder">Spin the wheel to reveal the result.</div>';
-    }
-
-    function drawWheel() {
-      ctx.clearRect(0, 0, WHEEL_SIZE, WHEEL_SIZE);
-
-      const outerGradient = ctx.createRadialGradient(CENTER, CENTER, RADIUS - 30, CENTER, CENTER, RADIUS + 20);
-      outerGradient.addColorStop(0, 'rgba(255,255,255,0.08)');
-      outerGradient.addColorStop(1, 'rgba(255,255,255,0.02)');
-      ctx.beginPath();
-      ctx.arc(CENTER, CENTER, RADIUS + 16, 0, Math.PI * 2);
-      ctx.fillStyle = outerGradient;
-      ctx.fill();
-
-      for (let i = 0; i < TOTAL_SECTORS; i++) {
-        const start = degToRad(i * sliceAngle - 90);
-        const end = degToRad((i + 1) * sliceAngle - 90);
-        const seg = segments[i];
-
-        let c1, c2;
-        if (seg.type === 'winner') [c1, c2] = ['#b7791f', '#f6d365'];
-        else [c1, c2] = ['#8f1e1e', '#ff5656'];
-
-        const grad = ctx.createLinearGradient(0, 0, WHEEL_SIZE, WHEEL_SIZE);
-        grad.addColorStop(0, c1);
-        grad.addColorStop(1, c2);
-
-        ctx.beginPath();
-        ctx.moveTo(CENTER, CENTER);
-        ctx.arc(CENTER, CENTER, RADIUS, start, end);
-        ctx.closePath();
-        ctx.fillStyle = grad;
-        ctx.fill();
-        ctx.lineWidth = 1.1;
-        ctx.strokeStyle = 'rgba(255,255,255,0.24)';
-        ctx.stroke();
-
-        const mid = degToRad((i + 0.5) * sliceAngle - 90);
-        const textRadius = RADIUS - 64;
-        const x = CENTER + Math.cos(mid) * textRadius;
-        const y = CENTER + Math.sin(mid) * textRadius;
-
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(mid + Math.PI / 2);
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.font = '800 10px Arial';
-        ctx.fillText(seg.icon, 0, -3);
-        ctx.font = '800 7px Arial';
-        ctx.fillText(seg.label, 0, 10);
-        ctx.restore();
-      }
-
-      ctx.beginPath();
-      ctx.arc(CENTER, CENTER, 54, 0, Math.PI * 2);
-      ctx.fillStyle = '#f8fafc';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(CENTER, CENTER, 40, 0, Math.PI * 2);
-      ctx.fillStyle = '#14532d';
-      ctx.fill();
-      ctx.fillStyle = 'white';
-      ctx.textAlign = 'center';
-      ctx.font = '800 14px Arial';
-      ctx.fillText('PLAY', CENTER, CENTER + 5);
-    }
-
-    function degToRad(deg) {
-      return (deg * Math.PI) / 180;
-    }
-
-    function randomTargetIndex() {
-      return Math.floor(Math.random() * TOTAL_SECTORS);
-    }
-
-    function spinWheel() {
-      const name = playerNameInput.value.trim();
-      if (!name || isSpinning) return;
-
-      const current = ensurePlayer(name);
-      if (current && current.status === 'winner') {
-        setMessage(name + ', this device has already won.');
-        updateUI();
-        return;
-      }
-
-      isSpinning = true;
-      setResult(null);
-      setMessage('The wheel is spinning...');
-      updateUI();
-
-      const selectedIndex = randomTargetIndex();
-      const selectedSegment = segments[selectedIndex];
-      const targetSegmentCenter = selectedIndex * sliceAngle + sliceAngle / 2;
-      const targetRotation = 360 - targetSegmentCenter;
-      const extraSpins = 360 * (7 + Math.floor(Math.random() * 2));
-      rotation = rotation + extraSpins + targetRotation + 360;
-      wheelCanvas.style.transform = `rotate(${rotation}deg)`;
-
-      setTimeout(() => {
-        isSpinning = false;
-        state.totalSpins += 1;
-
-        const player = getCurrentPlayer();
-        if (player) {
-          player.spins += 1;
-          if (selectedSegment.type === 'winner') {
-            player.status = 'winner';
-            state.winnerName = player.name;
-          }
-        }
-
-        if (selectedSegment.type === 'winner') {
-          setMessage('Congratulations! Only the golden WINNER sector gives the gift.');
-        }  else {
-          setMessage('NICE TRY landed. You can keep spinning and go for the golden sector.');
-        }
-
-        setResult(selectedSegment.type);
-        updateUI();
-      }, 5700);
-    }
-
-    playerNameInput.addEventListener('input', updateUI);
-    spinBtn.addEventListener('click', spinWheel);
-
-    loadState();
-    drawWheel();
-    setResult(null);
-    if (getCurrentPlayer()) {
-      const current = getCurrentPlayer();
-      playerNameInput.value = current.name;
-      setMessage(current.status === 'winner'
-        ? `${current.name}, this device has already won.`
-        : `${current.name}, this device can keep playing until it wins.`);
-    }
-    updateUI();
-  </script>
+loadLeaderboard();
+renderLeaderboard();
+initSolvedBoard();
+</script>
 </body>
 </html>
