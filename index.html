@@ -12,7 +12,6 @@
   --border:rgba(255,255,255,0.12);
   --text:#f6fff7;
   --muted:rgba(255,255,255,0.72);
-  --gold:#facc15;
 }
 *{box-sizing:border-box}
 body{
@@ -64,13 +63,24 @@ h1{margin:0;font-size:clamp(32px,5vw,56px);line-height:1.02}
 .tile{
   background-image:url('https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg');
   background-size:400% 400%;
+  background-repeat:no-repeat;
   cursor:pointer;
   user-select:none;
   transition:transform .15s ease;
 }
 .tile:hover{transform:scale(0.98)}
-.empty{background:none;background-color:rgba(255,255,255,0.04);cursor:default}
-#referenceImage{width:min(100%,420px);border-radius:22px;border:1px solid rgba(255,255,255,0.12);display:block;margin:auto}
+.empty{
+  background:none;
+  background-color:rgba(255,255,255,0.04);
+  cursor:default;
+}
+#referenceImage{
+  width:min(100%,420px);
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,0.12);
+  display:block;
+  margin:auto;
+}
 .leaderboard-list{max-height:420px;overflow:auto;padding-right:4px}
 .entry{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05);margin-bottom:10px}
 .entry-left{display:flex;gap:12px;align-items:center;text-align:left}
@@ -191,12 +201,12 @@ function render() {
 function getValidMoves(emptyIndex) {
   const row = Math.floor(emptyIndex / SIZE);
   const col = emptyIndex % SIZE;
-  const moves = [];
-  if (col > 0) moves.push(emptyIndex - 1);
-  if (col < SIZE - 1) moves.push(emptyIndex + 1);
-  if (row > 0) moves.push(emptyIndex - SIZE);
-  if (row < SIZE - 1) moves.push(emptyIndex + SIZE);
-  return moves;
+  const valid = [];
+  if (col > 0) valid.push(emptyIndex - 1);
+  if (col < SIZE - 1) valid.push(emptyIndex + 1);
+  if (row > 0) valid.push(emptyIndex - SIZE);
+  if (row < SIZE - 1) valid.push(emptyIndex + SIZE);
+  return valid;
 }
 
 function startGame() {
@@ -218,7 +228,7 @@ function shuffleBoard(steps) {
   let emptyIndex = tiles.indexOf(TOTAL - 1);
   let previousIndex = -1;
   for (let i = 0; i < steps; i++) {
-    let valid = getValidMoves(emptyIndex).filter(v => v !== previousIndex);
+    const valid = getValidMoves(emptyIndex).filter(v => v !== previousIndex);
     const chosen = valid[Math.floor(Math.random() * valid.length)];
     [tiles[emptyIndex], tiles[chosen]] = [tiles[chosen], tiles[emptyIndex]];
     previousIndex = emptyIndex;
@@ -262,7 +272,7 @@ function stopTimer() {
 
 function formatTime(totalSeconds) {
   const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-  const s = String(totalSeconds % 60)).padStart(2, '0');
+  const s = String(totalSeconds % 60).padStart(2, '0');
   return `${m}:${s}`;
 }
 
@@ -328,15 +338,15 @@ function renderLeaderboard() {
   }
 
   box.innerHTML = leaderboard.slice(0, 20).map((item, idx) => `
-    <div class=\"entry\">
-      <div class=\"entry-left\">
-        <div class=\"rank\">${idx + 1}</div>
+    <div class="entry">
+      <div class="entry-left">
+        <div class="rank">${idx + 1}</div>
         <div>
-          <div class=\"name\">${escapeHtml(item.name)}</div>
-          <div class=\"meta\">Moves: ${item.moves} • Time: ${formatTime(item.seconds)}</div>
+          <div class="name">${escapeHtml(item.name)}</div>
+          <div class="meta">Moves: ${item.moves} • Time: ${formatTime(item.seconds)}</div>
         </div>
       </div>
-      <div class=\"score\">${item.score}</div>
+      <div class="score">${item.score}</div>
     </div>
   `).join('');
 }
