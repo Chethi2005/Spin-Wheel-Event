@@ -53,8 +53,8 @@ h1{margin:0;font-size:clamp(32px,5vw,56px);line-height:1.02}
   width:min(92vw,520px);
   height:min(92vw,520px);
   display:grid;
-  grid-template-columns:repeat(5,1fr);
-  grid-template-rows:repeat(5,1fr);
+  grid-template-columns:repeat(4,1fr);
+  grid-template-rows:repeat(4,1fr);
   gap:2px;
   border-radius:22px;
   overflow:hidden;
@@ -63,7 +63,7 @@ h1{margin:0;font-size:clamp(32px,5vw,56px);line-height:1.02}
 }
 .tile{
   background-image:url('https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg');
-  background-size:500% 500%;
+  background-size:400% 400%;
   cursor:pointer;
   user-select:none;
   transition:transform .15s ease;
@@ -86,13 +86,13 @@ h1{margin:0;font-size:clamp(32px,5vw,56px);line-height:1.02}
 <body>
 <div class="container">
   <div class="badge">Puzzle Competition</div>
-  <h1>5×5 image puzzle challenge</h1>
+  <h1>4×4 image puzzle challenge</h1>
   <p class="lead">Complete the puzzle using the fewest moves and fastest time. The leaderboard ranks players by combined score, with moves shown clearly so you can decide the gift winner fairly.</p>
 
   <div class="grid">
     <div class="panel section">
       <h2 style="margin:0 0 6px">Play the puzzle</h2>
-      <p class="sub">Enter your name, shuffle the 5×5 image puzzle, then solve it. Your time, moves, and score will be saved when you finish.</p>
+      <p class="sub">Enter your name, shuffle the 4×4 image puzzle, then solve it. Your time, moves, and score will be saved when you finish.</p>
       <input id="playerName" class="input" placeholder="Enter player name" maxlength="40">
       <div class="actions">
         <button id="shuffleBtn" class="btn btn-primary">Start / Shuffle</button>
@@ -138,7 +138,7 @@ h1{margin:0;font-size:clamp(32px,5vw,56px);line-height:1.02}
 </div>
 
 <script>
-const SIZE = 5;
+const SIZE = 4;
 const TOTAL = SIZE * SIZE;
 const LEADERBOARD_KEY = 'image-puzzle-leaderboard-v1';
 let tiles = [];
@@ -262,7 +262,7 @@ function stopTimer() {
 
 function formatTime(totalSeconds) {
   const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-  const s = String(totalSeconds % 60).padStart(2, '0');
+  const s = String(totalSeconds % 60)).padStart(2, '0');
   return `${m}:${s}`;
 }
 
@@ -323,20 +323,20 @@ function renderLeaderboard() {
   bestScore.textContent = leaderboard.length ? leaderboard[0].score : '—';
 
   if (!leaderboard.length) {
-    box.innerHTML = '<div class="entry"><div class="entry-left"><div class="rank">—</div><div><div class="name">No scores yet</div><div class="meta">Finish a puzzle to appear here.</div></div></div></div>';
+    box.innerHTML = '<div class=\"entry\"><div class=\"entry-left\"><div class=\"rank\">—</div><div><div class=\"name\">No scores yet</div><div class=\"meta\">Finish a puzzle to appear here.</div></div></div></div>';
     return;
   }
 
   box.innerHTML = leaderboard.slice(0, 20).map((item, idx) => `
-    <div class="entry">
-      <div class="entry-left">
-        <div class="rank">${idx + 1}</div>
+    <div class=\"entry\">
+      <div class=\"entry-left\">
+        <div class=\"rank\">${idx + 1}</div>
         <div>
-          <div class="name">${escapeHtml(item.name)}</div>
-          <div class="meta">Moves: ${item.moves} • Time: ${formatTime(item.seconds)}</div>
+          <div class=\"name\">${escapeHtml(item.name)}</div>
+          <div class=\"meta\">Moves: ${item.moves} • Time: ${formatTime(item.seconds)}</div>
         </div>
       </div>
-      <div class="score">${item.score}</div>
+      <div class=\"score\">${item.score}</div>
     </div>
   `).join('');
 }
@@ -354,8 +354,8 @@ function escapeHtml(text) {
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+    .replaceAll('\"', '&quot;')
+    .replaceAll(\"'\", '&#039;');
 }
 
 loadLeaderboard();
