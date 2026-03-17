@@ -2,138 +2,147 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Purble Pairs Style Memory Game</title>
 <style>
 :root{
-  --bg1:#f7b2d9;
-  --bg2:#d8a8ff;
-  --panel:#ffffffcc;
-  --panelBorder:#ffffff88;
-  --text:#40245c;
-  --muted:#6a5a7e;
+  --bg1:#ffd8ef;
+  --bg2:#e5c6ff;
+  --panel:#fff7ffdd;
+  --panelBorder:#ffffffb0;
+  --text:#4b2a66;
+  --muted:#745c89;
   --purple:#8b5cf6;
   --purpleDark:#6d28d9;
+  --purpleLight:#d8b4fe;
   --green:#34d399;
   --yellow:#fde047;
   --pink:#fb7185;
+  --board:#8b5cf6;
+  --board2:#b794f6;
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{
   margin:0;
   font-family:Arial,sans-serif;
   color:var(--text);
-  background:radial-gradient(circle at top,#ffd3ea 0%,#e9c1ff 40%,#cfa6ff 100%);
+  background:radial-gradient(circle at top,#ffdff0 0%,#f0d2ff 40%,#dab4ff 100%);
 }
 .container{
-  width:min(1320px,calc(100% - 20px));
+  width:min(1380px,calc(100% - 14px));
   margin:0 auto;
-  padding:18px 0 30px;
+  padding:14px 0 20px;
 }
-.topbar{
-  text-align:center;
-  margin-bottom:14px;
-}
+.topbar{text-align:center;margin-bottom:10px}
 .badge{
-  display:inline-block;
-  padding:8px 14px;
-  border-radius:999px;
-  background:#ffffff8c;
-  border:1px solid #ffffffaa;
-  font-size:13px;
-  margin-bottom:10px;
+  display:inline-block;padding:8px 14px;border-radius:999px;background:#ffffff94;border:1px solid #ffffffca;font-size:13px;margin-bottom:10px
 }
-h1{margin:0;font-size:clamp(28px,4.5vw,52px);line-height:1.03}
-.lead{max-width:860px;margin:12px auto 0;color:var(--muted);line-height:1.6}
-.layout{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:start;margin-top:18px}
+h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
+.lead{max-width:920px;margin:10px auto 0;color:var(--muted);line-height:1.55;font-size:15px}
+.layout{display:grid;grid-template-columns:1.08fr .92fr;gap:14px;align-items:start;margin-top:14px}
 .panel{
   background:var(--panel);
   border:1px solid var(--panelBorder);
   border-radius:28px;
-  box-shadow:0 20px 60px rgba(104,58,148,.18);
-  backdrop-filter:blur(10px);
+  box-shadow:0 16px 40px rgba(104,58,148,.16);
+  backdrop-filter:blur(8px);
 }
-.section{padding:18px}
+.section{padding:16px}
 .section h2{margin:0 0 6px;font-size:22px}
-.sub{margin:0 0 14px;color:var(--muted);line-height:1.5}
-.controls{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin-bottom:14px}
+.sub{margin:0 0 12px;color:var(--muted);line-height:1.45;font-size:14px}
+.controls{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-bottom:12px}
 .input{
-  width:100%;height:46px;border-radius:16px;border:1px solid #ffffffaa;background:#ffffffc7;color:var(--text);
+  width:100%;height:46px;border-radius:16px;border:1px solid #ffffffaa;background:#ffffffd7;color:var(--text);
   padding:0 14px;font-size:15px;outline:none;
 }
-.btn{border:0;border-radius:999px;padding:12px 20px;font-weight:800;cursor:pointer}
+.btn{border:0;border-radius:999px;padding:12px 16px;font-weight:800;cursor:pointer;font-size:14px}
 .btn-primary{background:linear-gradient(180deg,#fde047,#facc15);color:#4b2468}
-.btn-secondary{background:#ffffffcf;color:var(--text);border:1px solid #ffffffb8}
-.status-row,.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.btn-secondary{background:#ffffffd8;color:var(--text);border:1px solid #ffffffb8}
+.btn:disabled{opacity:.58;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .stat{
-  background:#ffffff96;border:1px solid #ffffffc0;border-radius:20px;padding:14px;text-align:center;
+  background:#ffffff9a;border:1px solid #ffffffcc;border-radius:18px;padding:12px;text-align:center;
 }
-.stat .num{font-size:28px;font-weight:900}
-.stat .label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.stat .num{font-size:24px;font-weight:900}
+.stat .label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
 .board-wrap{
-  margin-top:16px;
-  background:linear-gradient(180deg,#9f67ff,#7c3aed);
+  margin-top:14px;
+  background:linear-gradient(180deg,var(--board2),var(--board));
   border-radius:30px;
-  padding:16px;
-  border:6px solid #b48cff;
-  box-shadow:inset 0 0 0 3px #6d28d9;
+  padding:12px;
+  border:6px solid #c4a3ff;
+  box-shadow:inset 0 0 0 3px var(--purpleDark);
 }
-#board{
-  display:grid;
-  grid-template-columns:repeat(8,1fr);
-  gap:6px;
-}
+#board{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
 .card{
   aspect-ratio:1/1;
-  border-radius:12px;
+  min-height:40px;
+  border-radius:10px;
   position:relative;
   transform-style:preserve-3d;
-  transition:transform .35s ease;
+  transition:transform .28s ease, opacity .25s ease, scale .18s ease;
   cursor:pointer;
 }
-.card.flipped,.card.matched{transform:rotateY(180deg)}
+.card:active{scale:.97}
+.card.flipped{transform:rotateY(180deg)}
+.card.matched{opacity:.07;pointer-events:none;transform:scale(.9)}
 .card-face{
-  position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;
-  user-select:none;
+  position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;overflow:hidden;
 }
 .card-back{
-  background:linear-gradient(180deg,#ece2ff,#d5c0ff);
+  background:linear-gradient(180deg,#efe5ff,#dbcbff);
   border:2px solid #7c3aed;
-  box-shadow:inset 0 2px 0 #fff8;
+  box-shadow:inset 0 2px 0 #fff9, inset 0 -3px 0 rgba(109,40,217,.18);
 }
-.card-back .icon{font-size:30px;filter:drop-shadow(0 2px 0 rgba(255,255,255,.6))}
+.card-back .icon{font-size:clamp(18px,3vw,28px)}
 .card-front{
   transform:rotateY(180deg);
-  overflow:hidden;
   background:#fff;
   border:2px solid #7c3aed;
 }
 .card-front img{width:100%;height:100%;object-fit:cover;display:block}
-.card.matched .card-front{box-shadow:0 0 0 3px #34d399 inset}
-.side-grid{display:grid;gap:18px}
-.reference-box{display:grid;grid-template-columns:1fr 120px;gap:14px;align-items:center}
-.reference-box img{width:100%;max-width:380px;border-radius:22px;border:1px solid #fff;margin:auto;display:block}
+.side-grid{display:grid;gap:14px}
+.help-grid{display:grid;grid-template-columns:1fr 130px;gap:12px;align-items:center}
 .mascot{
   background:linear-gradient(180deg,#b18cff,#8b5cf6);
-  border-radius:24px;
-  padding:12px;
-  min-height:180px;
-  color:white;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;
+  border-radius:24px;padding:12px;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:170px
 }
-.mascot-face{font-size:54px;margin-bottom:8px}
-.mascot small{opacity:.9;line-height:1.4}
-.leaderboard-list{max-height:420px;overflow:auto;padding-right:4px}
-.entry{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1px solid #ffffffc0;background:#ffffff96;margin-bottom:10px}
+.mascot-face{font-size:50px;margin-bottom:8px}
+.mascot small{opacity:.94;line-height:1.35}
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.dropzone{
+  border:2px dashed #c4b5fd;background:#ffffff9a;border-radius:20px;padding:16px;text-align:center;color:var(--muted)
+}
+.preview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:300px;overflow:auto;padding-right:2px}
+.preview-item{aspect-ratio:1/1;border-radius:12px;overflow:hidden;border:1px solid #ffffffc8;background:#fff}
+.preview-item img{width:100%;height:100%;object-fit:cover;display:block}
+.pile-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:320px;overflow:auto;padding-right:2px}
+.pile-item{aspect-ratio:1/1;border-radius:12px;overflow:hidden;border:2px solid #86efac;background:#fff}
+.pile-item img{width:100%;height:100%;object-fit:cover;display:block}
+.leaderboard-list{max-height:320px;overflow:auto;padding-right:4px}
+.entry{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border-radius:18px;border:1px solid #ffffffc0;background:#ffffff9b;margin-bottom:8px}
 .entry-left{display:flex;gap:12px;align-items:center;text-align:left}
-.rank{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;background:#fef3c7;color:#7c2d12}
+.rank{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;background:#fef3c7;color:#7c2d12}
 .name{font-weight:800}
 .meta{font-size:12px;color:var(--muted);margin-top:4px}
-.score{font-weight:900;color:#7c3aed}
-.notice{margin-top:14px;padding:14px;border-radius:18px;background:#dcfce7;border:1px solid #86efac;color:#166534;display:none}
-@media (max-width:1080px){.layout{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.status-row,.stats{grid-template-columns:repeat(2,1fr)}.reference-box{grid-template-columns:1fr}}
-@media (max-width:700px){#board{grid-template-columns:repeat(6,1fr)}.controls{grid-template-columns:1fr}.status-row,.stats{grid-template-columns:1fr}}
+.time{font-weight:900;color:#7c3aed}
+.notice{margin-top:12px;padding:14px;border-radius:18px;background:#dcfce7;border:1px solid #86efac;color:#166534;display:none}
+.hidden-input{display:none}
+.hint-box{background:#ffffff94;border:1px solid #ffffffca;border-radius:18px;padding:12px;color:var(--muted);font-size:13px;line-height:1.45}
+.confetti{position:fixed;pointer-events:none;inset:0;overflow:hidden;z-index:99}
+.confetti-piece{position:absolute;width:10px;height:16px;opacity:.95;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:1}}
+@media (max-width:1120px){.layout{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.help-grid{grid-template-columns:1fr}.upload-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:760px){
+  .container{width:min(100% - 8px,1380px)}
+  .controls{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  #board{grid-template-columns:repeat(8,1fr);gap:3px}
+  .board-wrap{padding:8px;border-width:4px}
+  .section{padding:12px}
+  .upload-grid{grid-template-columns:1fr}
+  .preview-grid,.pile-grid{grid-template-columns:repeat(4,1fr)}
+}
 </style>
 </head>
 <body>
@@ -141,25 +150,26 @@ h1{margin:0;font-size:clamp(28px,4.5vw,52px);line-height:1.03}
   <div class="topbar">
     <div class="badge">Purble Pairs Style Competition</div>
     <h1>Memory matching challenge</h1>
-    <p class="lead">This version is fully converted into a Purble Pairs style memory game. Flip cards, match identical image tiles, and finish with the best combined score. Lower score is better.</p>
+    <p class="lead">Upload 32 images of your choice. The game duplicates them to make 64 cards, shuffles them randomly into an 8×8 board, removes matched cards from the board, and places them into the matching pile. Built to feel playful and easier to use on phones.</p>
   </div>
 
   <div class="layout">
     <div class="panel section">
       <h2>Play the game</h2>
-      <p class="sub">Enter a player name, start the board, then flip two cards at a time to find matching image pieces.</p>
+      <p class="sub">Enter a player name, upload exactly 32 images, then start the memory board. Match pairs by flipping two cards at a time.</p>
 
       <div class="controls">
         <input id="playerName" class="input" placeholder="Enter player name" maxlength="40">
+        <button id="uploadBtn" class="btn btn-secondary">Upload 32 Images</button>
         <button id="startBtn" class="btn btn-primary">Start Game</button>
-        <button id="resetBtn" class="btn btn-secondary">Reset Leaderboard</button>
       </div>
+      <input id="fileInput" class="hidden-input" type="file" accept="image/*" multiple>
 
-      <div class="status-row">
+      <div class="stats">
         <div class="stat"><div class="num" id="moves">0</div><div class="label">Moves</div></div>
-        <div class="stat"><div class="num" id="matches">0</div><div class="label">Matches</div></div>
+        <div class="stat"><div class="num" id="matches">0/32</div><div class="label">Matches</div></div>
         <div class="stat"><div class="num" id="timer">00:00</div><div class="label">Time</div></div>
-        <div class="stat"><div class="num" id="scoreLive">0</div><div class="label">Score</div></div>
+        <div class="stat"><div class="num" id="imagesCount">0/32</div><div class="label">Images Ready</div></div>
       </div>
 
       <div class="board-wrap">
@@ -171,45 +181,51 @@ h1{margin:0;font-size:clamp(28px,4.5vw,52px);line-height:1.03}
 
     <div class="side-grid">
       <div class="panel section">
-        <h2>Reference image</h2>
-        <p class="sub">All matched tiles come from this same image.</p>
-        <div class="reference-box">
-          <img src="https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg" alt="Reference image">
+        <h2>Upload preview</h2>
+        <p class="sub">These are the 32 images you provide. They are duplicated into 64 random cards for the game.</p>
+        <div class="help-grid">
+          <div>
+            <div class="dropzone" id="dropzone">
+              Tap <strong>Upload 32 Images</strong> and select exactly 32 pictures. Square or simple images are easiest to spot on mobile.
+            </div>
+            <div class="hint-box" style="margin-top:10px">
+              Better version of your idea: once 2 cards match, they fade from the board and move to the matching pile, so players can clearly see progress. Leaderboard ranks by least moves first, then fastest time.
+            </div>
+          </div>
           <div class="mascot">
-            <div class="mascot-face">🧠</div>
+            <div class="mascot-face">🃏</div>
             <strong>How to play</strong>
-            <small>Tap two cards. If the pictures match, they stay open. Clear all pairs to finish.</small>
+            <small>Flip 2 cards. If they match, they disappear from the board and go to the pile.</small>
           </div>
         </div>
+        <div class="preview-grid" id="previewGrid" style="margin-top:12px"></div>
+      </div>
+
+      <div class="panel section">
+        <h2>Matching pile</h2>
+        <p class="sub">Every matched pair is collected here.</p>
+        <div class="pile-grid" id="pileGrid"></div>
       </div>
 
       <div class="panel section">
         <h2>Leaderboard</h2>
-        <p class="sub">Top scores are saved with player name, moves, time, and combined score.</p>
-        <div class="stats" style="margin-bottom:16px">
-          <div class="stat"><div class="num" id="playersCount">0</div><div class="label">Results Saved</div></div>
-          <div class="stat"><div class="num" id="bestMoves">—</div><div class="label">Best Moves</div></div>
-          <div class="stat"><div class="num" id="bestScore">—</div><div class="label">Best Score</div></div>
-          <div class="stat"><div class="num" id="bestTime">—</div><div class="label">Best Time</div></div>
-        </div>
+        <p class="sub">Best players are ranked by fewest moves, then fastest time.</p>
         <div class="leaderboard-list" id="leaderboardList">
           <div class="entry"><div class="entry-left"><div class="rank">—</div><div><div class="name">No scores yet</div><div class="meta">Finish a game to appear here.</div></div></div></div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button id="resetBtn" class="btn btn-secondary">Reset Leaderboard</button>
+          <button id="soundBtn" class="btn btn-secondary">Sound: On</button>
         </div>
       </div>
     </div>
   </div>
 </div>
+<div class="confetti" id="confetti"></div>
 
 <script>
-const LEADERBOARD_KEY = 'purble-pairs-style-v1';
-const IMAGE_URL = 'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg';
-const COLS = 8;
-const ROWS = 6;
-const TOTAL_CARDS = COLS * ROWS; // 48
-const TOTAL_PAIRS = TOTAL_CARDS / 2;
-const TILE_COLS = 4;
-const TILE_ROWS = 6; // 24 unique pieces
-
+const LEADERBOARD_KEY = 'purble-pairs-custom-v2';
+let uploadedImages = [];
 let deck = [];
 let flipped = [];
 let matchedPairs = 0;
@@ -219,31 +235,99 @@ let timerInterval = null;
 let started = false;
 let lockBoard = false;
 let leaderboard = [];
+let soundOn = true;
+let matchedPile = [];
 
 const board = document.getElementById('board');
 const movesEl = document.getElementById('moves');
 const matchesEl = document.getElementById('matches');
 const timerEl = document.getElementById('timer');
-const scoreLiveEl = document.getElementById('scoreLive');
+const imagesCountEl = document.getElementById('imagesCount');
 const playerNameInput = document.getElementById('playerName');
 const notice = document.getElementById('notice');
+const previewGrid = document.getElementById('previewGrid');
+const pileGrid = document.getElementById('pileGrid');
+const fileInput = document.getElementById('fileInput');
+const confetti = document.getElementById('confetti');
 
+const audioCtx = window.AudioContext ? new AudioContext() : (window.webkitAudioContext ? new webkitAudioContext() : null);
+
+document.getElementById('uploadBtn').addEventListener('click', () => fileInput.click());
 document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('resetBtn').addEventListener('click', resetLeaderboard);
+document.getElementById('soundBtn').addEventListener('click', toggleSound);
+fileInput.addEventListener('change', handleFiles);
 
-function makePieces() {
-  const pieces = [];
-  for (let row = 0; row < TILE_ROWS; row++) {
-    for (let col = 0; col < TILE_COLS; col++) {
-      const id = row * TILE_COLS + col;
-      pieces.push({
-        id,
-        x: (col / (TILE_COLS - 1)) * 100,
-        y: (row / (TILE_ROWS - 1)) * 100
-      });
-    }
+function toggleSound() {
+  soundOn = !soundOn;
+  document.getElementById('soundBtn').textContent = `Sound: ${soundOn ? 'On' : 'Off'}`;
+}
+
+function beep(type) {
+  if (!soundOn || !audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  if (type === 'flip') {
+    osc.frequency.value = 520;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+    osc.start(now); osc.stop(now + 0.12);
+  } else if (type === 'match') {
+    osc.frequency.setValueAtTime(620, now);
+    osc.frequency.linearRampToValueAtTime(880, now + 0.18);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.1, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+    osc.start(now); osc.stop(now + 0.22);
+  } else if (type === 'win') {
+    const notes = [660, 880, 990];
+    notes.forEach((freq, i) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.frequency.value = freq;
+      const t = now + i * 0.11;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+      o.start(t); o.stop(t + 0.2);
+    });
   }
-  return pieces;
+}
+
+function handleFiles(e) {
+  const files = Array.from(e.target.files || []);
+  if (files.length !== 32) {
+    showNotice('Please select exactly 32 images.', false);
+    return;
+  }
+  Promise.all(files.map(fileToDataURL)).then(images => {
+    uploadedImages = images;
+    renderPreview();
+    imagesCountEl.textContent = `${uploadedImages.length}/32`;
+    showNotice('32 images loaded successfully. You can now start the game.', true);
+  });
+}
+
+function fileToDataURL(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPreview() {
+  previewGrid.innerHTML = uploadedImages.map(src => `<div class="preview-item"><img src="${src}" alt="uploaded"></div>`).join('');
+}
+
+function renderPile() {
+  pileGrid.innerHTML = matchedPile.map(src => `<div class="pile-item"><img src="${src}" alt="matched"></div>`).join('');
 }
 
 function shuffleArray(arr) {
@@ -255,12 +339,10 @@ function shuffleArray(arr) {
 }
 
 function createDeck() {
-  const pieces = makePieces();
-  const doubled = [...pieces, ...pieces].map((piece, index) => ({
+  const doubled = [...uploadedImages, ...uploadedImages].map((src, index) => ({
     uid: index + '-' + Math.random().toString(36).slice(2, 8),
-    pairId: piece.id,
-    x: piece.x,
-    y: piece.y,
+    pairId: src,
+    src,
     flipped: false,
     matched: false
   }));
@@ -274,9 +356,7 @@ function renderBoard() {
     cardEl.className = 'card' + (card.flipped ? ' flipped' : '') + (card.matched ? ' matched' : '');
     cardEl.innerHTML = `
       <div class="card-face card-back"><div class="icon">🍀</div></div>
-      <div class="card-face card-front">
-        <img src="${IMAGE_URL}" alt="tile" style="object-position:${card.x}% ${card.y}%">
-      </div>
+      <div class="card-face card-front"><img src="${card.src}" alt="card"></div>
     `;
     cardEl.addEventListener('click', () => flipCard(index));
     board.appendChild(cardEl);
@@ -289,15 +369,21 @@ function startGame() {
     showNotice('Enter a player name first.', false);
     return;
   }
+  if (uploadedImages.length !== 32) {
+    showNotice('Upload exactly 32 images first.', false);
+    return;
+  }
   createDeck();
   flipped = [];
   matchedPairs = 0;
+  matchedPile = [];
   moves = 0;
   seconds = 0;
   started = true;
   lockBoard = false;
   hideNotice();
   updateStats();
+  renderPile();
   renderBoard();
   startTimer();
 }
@@ -306,9 +392,11 @@ function flipCard(index) {
   if (!started || lockBoard) return;
   const card = deck[index];
   if (card.flipped || card.matched) return;
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
   card.flipped = true;
   flipped.push(index);
+  beep('flip');
   renderBoard();
 
   if (flipped.length === 2) {
@@ -328,11 +416,14 @@ function checkMatch() {
     a.matched = true;
     b.matched = true;
     matchedPairs++;
+    matchedPile.push(a.src, b.src);
     flipped = [];
     lockBoard = false;
+    beep('match');
     updateStats();
+    renderPile();
     renderBoard();
-    if (matchedPairs === TOTAL_PAIRS) finishGame();
+    if (matchedPairs === 32) finishGame();
   } else {
     setTimeout(() => {
       a.flipped = false;
@@ -340,7 +431,7 @@ function checkMatch() {
       flipped = [];
       lockBoard = false;
       renderBoard();
-    }, 700);
+    }, 650);
   }
 }
 
@@ -363,15 +454,11 @@ function formatTime(totalSeconds) {
   return `${m}:${s}`;
 }
 
-function getScore() {
-  return moves + seconds;
-}
-
 function updateStats() {
   movesEl.textContent = moves;
-  matchesEl.textContent = matchedPairs + '/' + TOTAL_PAIRS;
+  matchesEl.textContent = `${matchedPairs}/32`;
   timerEl.textContent = formatTime(seconds);
-  scoreLiveEl.textContent = getScore();
+  imagesCountEl.textContent = `${uploadedImages.length}/32`;
 }
 
 function finishGame() {
@@ -382,14 +469,15 @@ function finishGame() {
     name,
     moves,
     seconds,
-    score: getScore(),
     completedAt: new Date().toISOString()
   };
   leaderboard.push(result);
-  leaderboard.sort((a, b) => a.score - b.score || a.moves - b.moves || a.seconds - b.seconds || a.name.localeCompare(b.name));
+  leaderboard.sort((a, b) => a.moves - b.moves || a.seconds - b.seconds || a.name.localeCompare(b.name));
   saveLeaderboard();
   renderLeaderboard();
-  showNotice(`${escapeHtml(name)} finished the game in ${moves} moves and ${formatTime(seconds)}. Combined score: ${getScore()}.`, true);
+  beep('win');
+  launchConfetti();
+  showNotice(`${escapeHtml(name)} finished the game in ${moves} moves and ${formatTime(seconds)}.`, true);
 }
 
 function loadLeaderboard() {
@@ -409,31 +497,20 @@ function saveLeaderboard() {
 
 function renderLeaderboard() {
   const box = document.getElementById('leaderboardList');
-  const playersCount = document.getElementById('playersCount');
-  const bestMoves = document.getElementById('bestMoves');
-  const bestScore = document.getElementById('bestScore');
-  const bestTime = document.getElementById('bestTime');
-
-  playersCount.textContent = leaderboard.length;
-  bestMoves.textContent = leaderboard.length ? leaderboard[0].moves : '—';
-  bestScore.textContent = leaderboard.length ? leaderboard[0].score : '—';
-  bestTime.textContent = leaderboard.length ? formatTime(leaderboard[0].seconds) : '—';
-
   if (!leaderboard.length) {
     box.innerHTML = '<div class="entry"><div class="entry-left"><div class="rank">—</div><div><div class="name">No scores yet</div><div class="meta">Finish a game to appear here.</div></div></div></div>';
     return;
   }
-
   box.innerHTML = leaderboard.slice(0, 20).map((item, idx) => `
     <div class="entry">
       <div class="entry-left">
         <div class="rank">${idx + 1}</div>
         <div>
           <div class="name">${escapeHtml(item.name)}</div>
-          <div class="meta">Moves: ${item.moves} • Time: ${formatTime(item.seconds)}</div>
+          <div class="meta">Moves: ${item.moves}</div>
         </div>
       </div>
-      <div class="score">${item.score}</div>
+      <div class="time">${formatTime(item.seconds)}</div>
     </div>
   `).join('');
 }
@@ -444,6 +521,22 @@ function resetLeaderboard() {
   leaderboard = [];
   saveLeaderboard();
   renderLeaderboard();
+}
+
+function launchConfetti() {
+  confetti.innerHTML = '';
+  const colors = ['#fde047','#fb7185','#34d399','#60a5fa','#a78bfa'];
+  for (let i = 0; i < 120; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = -20 - Math.random() * 120 + 'px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+    piece.style.animationDuration = (2.8 + Math.random() * 2.4) + 's';
+    confetti.appendChild(piece);
+  }
+  setTimeout(() => confetti.innerHTML = '', 5500);
 }
 
 function showNotice(text, success) {
@@ -470,6 +563,7 @@ function escapeHtml(text) {
 loadLeaderboard();
 renderLeaderboard();
 updateStats();
+renderPile();
 renderBoard();
 </script>
 </body>
