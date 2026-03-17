@@ -70,7 +70,17 @@ h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
 .btn:active{transform:translateY(1px) scale(.99)}
 .btn-primary{background:linear-gradient(180deg,#fde047,#facc15);color:#4b2468;box-shadow:0 8px 18px rgba(250,204,21,.3)}
 .btn:disabled{opacity:.58;cursor:not-allowed}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  justify-items:center; /* centers all stat boxes */
+}
+
+/* Optional: center only the TIME box specifically */
+.stat:nth-child(3){
+  justify-self:center;
+}
 .stat{
   background:#ffffff9a;border:1px solid #ffffffcc;border-radius:18px;padding:12px;text-align:center;
 }
@@ -117,15 +127,15 @@ h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
 .bounce-match{animation:matchBounce .36s ease}
 @keyframes matchBounce{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
 .side-grid{display:grid;gap:14px}
-.help-grid{display:grid;grid-template-columns:1fr;gap:12px;align-items:center}
+.help-grid{display:grid;grid-template-columns:1fr 130px;gap:12px;align-items:center}
 .mascot{
   background:linear-gradient(180deg,#b18cff,#8b5cf6);
-  border-radius:24px;padding:20px;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:220px;
+  border-radius:24px;padding:12px;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:170px;
   box-shadow:inset 0 2px 0 rgba(255,255,255,.35)
 }
-.mascot-face{font-size:56px;margin-bottom:10px;animation:bob 2.2s ease-in-out infinite}
+.mascot-face{font-size:50px;margin-bottom:8px;animation:bob 2.2s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.mascot small{opacity:.94;line-height:1.45;font-size:14px;max-width:280px}
+.mascot small{opacity:.94;line-height:1.35}
 .pile-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:320px;overflow:auto;padding-right:2px}
 .pile-item{aspect-ratio:1/1;border-radius:12px;overflow:hidden;border:2px solid #86efac;background:#fff;animation:pilePop .25s ease}
 @keyframes pilePop{0%{transform:scale(.7);opacity:.4}100%{transform:scale(1);opacity:1}}
@@ -138,12 +148,15 @@ h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
 .meta{font-size:12px;color:var(--muted);margin-top:4px}
 .time{font-weight:900;color:#7c3aed}
 .notice{margin-top:12px;padding:14px;border-radius:18px;background:#dcfce7;border:1px solid #86efac;color:#166534;display:none}
+.hint-box{background:#ffffff94;border:1px solid #ffffffca;border-radius:18px;padding:12px;color:var(--muted);font-size:13px;line-height:1.45}
+.device-lock{background:var(--cream);border:1px solid #fcd34d;color:#7c2d12;border-radius:18px;padding:12px;font-size:13px;line-height:1.45}
 .confetti{position:fixed;pointer-events:none;inset:0;overflow:hidden;z-index:99}
 .confetti-piece{position:absolute;width:10px;height:16px;opacity:.95;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:1}}
 @media (max-width:1120px){
   .layout{grid-template-columns:1fr}
   .controls{grid-template-columns:1fr}
+  .help-grid{grid-template-columns:1fr}
 }
 @media (max-width:760px){
   .container{width:min(100% - 8px,1380px)}
@@ -160,9 +173,17 @@ h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
 <body>
 <div class="container">
   <div class="topbar">
-    <div class="badge">Sasnaka Sansada | Regreen Earth</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
+      <img src="https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/png%201.png" style="height:50px;object-fit:contain;">
+      <div class="badge">Sasnaka Sansada | Regreen Earth</div>
+      <img src="https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/png%202.png" style="height:50px;object-fit:contain;">
+    </div>
+
     <h1>Memory matching challenge</h1>
     <p class="lead">As part of REGREEN EARTH, Sasnaka Sansanda presents a Memory Matching Game. Test your skills, engage with sustainability, and stand a chance to be one of three winners of valuable prizes.</p>
+  </div>
+    <h1>Memory matching challenge</h1>
+    <p class="lead">Now with a cuter Purble-style feel, bigger tap targets, bouncey matches, improved sounds, haptic vibration on supported phones, and one-device play lock for fairness.</p>
   </div>
 
   <div class="layout">
@@ -179,6 +200,7 @@ h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
         <div class="stat"><div class="num" id="moves">0</div><div class="label">Moves</div></div>
         <div class="stat"><div class="num" id="matches">0/32</div><div class="label">Matches</div></div>
         <div class="stat"><div class="num" id="timer">00:00</div><div class="label">Time</div></div>
+        <div class="stat"><div class="num" id="imagesCount">0/32</div><div class="label">Images Ready</div></div>
       </div>
 
       <div class="board-wrap">
@@ -190,13 +212,21 @@ h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
 
     <div class="side-grid">
       <div class="panel section">
-        <h2>How to play</h2>
-        <p class="sub">Flip 2 cards at a time to find matching image pairs. Matched cards bounce, disappear from the board, and move into the matching pile.</p>
+        <h2>Game info</h2>
+        <p class="sub">Preview bar removed. This side now focuses on game help, fairness, and matched cards.</p>
         <div class="help-grid">
+          <div>
+            <div class="hint-box">
+              Better version of your idea: when 2 cards match, they bounce, disappear from the board, and move to the matching pile. The game ranks players by fewest moves first, then fastest time.
+            </div>
+            <div class="device-lock" style="margin-top:10px">
+              <strong>One device limit:</strong> once a device finishes one full game, it cannot start another unless browser storage is cleared.
+            </div>
+          </div>
           <div class="mascot">
             <div class="mascot-face">🃏</div>
             <strong>How to play</strong>
-            <small>Tap two cards. If they match, they disappear from the board and go to the pile. Finish in the fewest moves and fastest time.</small>
+            <small>Flip 2 cards. If they match, they disappear from the board and go to the pile.</small>
           </div>
         </div>
       </div>
@@ -229,38 +259,38 @@ const DEVICE_LOCK_KEY = 'purble-pairs-device-finished-v1';
 
 /* PASTE YOUR 32 IMAGE URLS BELOW */
 const IMAGE_URLS = [
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.03%20(2).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.03.jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.04%20(2).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.04%20(3).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.04.jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.05%20(1).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.05%20(2).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.05.jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.06%20(1).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.06%20(2).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.06%20(3).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.06.jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.07%20(1).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.07%20(2).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.07%20(3).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.07.jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.08%20(1).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.08%20(2).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.08.jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.09%20(1).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.09%20(2).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.09%20(3).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.09.jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.10%20(1).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.10%20(2).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.10.jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.11%20(1).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.11%20(2).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.11.jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.12%20(1).jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.12.jpeg',
-  'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/walle.jpeg'
+  'PASTE_IMAGE_URL_01_HERE',
+  'PASTE_IMAGE_URL_02_HERE',
+  'PASTE_IMAGE_URL_03_HERE',
+  'PASTE_IMAGE_URL_04_HERE',
+  'PASTE_IMAGE_URL_05_HERE',
+  'PASTE_IMAGE_URL_06_HERE',
+  'PASTE_IMAGE_URL_07_HERE',
+  'PASTE_IMAGE_URL_08_HERE',
+  'PASTE_IMAGE_URL_09_HERE',
+  'PASTE_IMAGE_URL_10_HERE',
+  'PASTE_IMAGE_URL_11_HERE',
+  'PASTE_IMAGE_URL_12_HERE',
+  'PASTE_IMAGE_URL_13_HERE',
+  'PASTE_IMAGE_URL_14_HERE',
+  'PASTE_IMAGE_URL_15_HERE',
+  'PASTE_IMAGE_URL_16_HERE',
+  'PASTE_IMAGE_URL_17_HERE',
+  'PASTE_IMAGE_URL_18_HERE',
+  'PASTE_IMAGE_URL_19_HERE',
+  'PASTE_IMAGE_URL_20_HERE',
+  'PASTE_IMAGE_URL_21_HERE',
+  'PASTE_IMAGE_URL_22_HERE',
+  'PASTE_IMAGE_URL_23_HERE',
+  'PASTE_IMAGE_URL_24_HERE',
+  'PASTE_IMAGE_URL_25_HERE',
+  'PASTE_IMAGE_URL_26_HERE',
+  'PASTE_IMAGE_URL_27_HERE',
+  'PASTE_IMAGE_URL_28_HERE',
+  'PASTE_IMAGE_URL_29_HERE',
+  'PASTE_IMAGE_URL_30_HERE',
+  'PASTE_IMAGE_URL_31_HERE',
+  'PASTE_IMAGE_URL_32_HERE'
 ];
 
 let deck = [];
@@ -279,6 +309,7 @@ const board = document.getElementById('board');
 const movesEl = document.getElementById('moves');
 const matchesEl = document.getElementById('matches');
 const timerEl = document.getElementById('timer');
+const imagesCountEl = document.getElementById('imagesCount');
 const playerNameInput = document.getElementById('playerName');
 const notice = document.getElementById('notice');
 const pileGrid = document.getElementById('pileGrid');
@@ -400,8 +431,6 @@ function renderBoard() {
 }
 
 function startGame() {
-  if (started) return;
-
   const name = playerNameInput.value.trim();
   const cleanImages = getCleanImages();
 
@@ -419,8 +448,6 @@ function startGame() {
   }
 
   createDeck();
-  playerNameInput.readOnly = true;
-  startBtn.disabled = true;
   flipped = [];
   matchedPairs = 0;
   matchedPile = [];
@@ -513,6 +540,7 @@ function updateStats() {
   movesEl.textContent = moves;
   matchesEl.textContent = `${matchedPairs}/32`;
   timerEl.textContent = formatTime(seconds);
+  imagesCountEl.textContent = `${getCleanImages().length}/32`;
 }
 
 function finishGame() {
@@ -520,7 +548,6 @@ function finishGame() {
   stopTimer();
   markDeviceFinished();
   startBtn.disabled = true;
-  playerNameInput.readOnly = true;
   const name = playerNameInput.value.trim();
   const result = {
     name,
@@ -616,9 +643,7 @@ renderLeaderboard();
 renderPile();
 updateStats();
 renderBoard();
-
 if (hasDeviceFinished()) {
-  playerNameInput.readOnly = true;
   startBtn.disabled = true;
   showNotice('This device has already completed one game. Starting a new game is blocked for fairness.', false);
 }
