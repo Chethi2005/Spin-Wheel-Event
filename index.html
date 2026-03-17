@@ -84,7 +84,7 @@ h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
   border:6px solid #c4a3ff;
   box-shadow:inset 0 0 0 3px var(--purpleDark), 0 12px 28px rgba(109,40,217,.22);
 }
-#board{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+#board{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 .card{
   aspect-ratio:1/1;
   min-height:52px;
@@ -148,7 +148,7 @@ h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
 @media (max-width:760px){
   .container{width:min(100% - 8px,1380px)}
   .stats{grid-template-columns:repeat(2,1fr)}
-  #board{grid-template-columns:repeat(8,1fr);gap:4px}
+  #board{grid-template-columns:repeat(6,1fr);gap:4px}
   .board-wrap{padding:8px;border-width:4px}
   .section{padding:12px}
   .pile-grid{grid-template-columns:repeat(4,1fr)}
@@ -177,7 +177,7 @@ h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
 
       <div class="stats">
         <div class="stat"><div class="num" id="moves">0</div><div class="label">Moves</div></div>
-        <div class="stat"><div class="num" id="matches">0/32</div><div class="label">Matches</div></div>
+        <div class="stat"><div class="num" id="matches">0/18</div><div class="label">Matches</div></div>
         <div class="stat"><div class="num" id="timer">00:00</div><div class="label">Time</div></div>
       </div>
 
@@ -227,7 +227,7 @@ h1{margin:0;font-size:clamp(28px,5vw,50px);line-height:1.03}
 const LEADERBOARD_KEY = 'purble-pairs-custom-v4';
 const DEVICE_LOCK_KEY = 'purble-pairs-device-finished-v1';
 
-/* PASTE YOUR 32 IMAGE URLS BELOW */
+/* PASTE YOUR IMAGE URLS BELOW */
 const IMAGE_URLS = [
   'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.03%20(2).jpeg',
   'https://raw.githubusercontent.com/Chethi2005/Spin-Wheel-Event/main/WhatsApp%20Image%202026-03-17%20at%2016.36.03.jpeg',
@@ -291,7 +291,8 @@ document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('soundBtn').addEventListener('click', toggleSound);
 
 function getCleanImages() {
-  return IMAGE_URLS.filter(url => url && !url.includes('PASTE_IMAGE_URL_'));
+  const cleaned = IMAGE_URLS.filter(url => url && !url.includes('PASTE_IMAGE_URL_'));
+  return cleaned.slice(0, 18);
 }
 
 function hasDeviceFinished() {
@@ -413,8 +414,8 @@ function startGame() {
     showNotice('Enter a player name first.', false);
     return;
   }
-  if (cleanImages.length !== 32) {
-    showNotice('Please paste exactly 32 image URLs into the IMAGE_URLS array first.', false);
+  if (cleanImages.length !== 18) {
+    showNotice('Please provide at least 18 valid image URLs.', false);
     return;
   }
 
@@ -477,7 +478,7 @@ function checkMatch() {
       updateStats();
       renderPile();
       renderBoard();
-      if (matchedPairs === 32) finishGame();
+      if (matchedPairs === 18) finishGame();
     }, 260);
   } else {
     setTimeout(() => {
@@ -511,7 +512,7 @@ function formatTime(totalSeconds) {
 
 function updateStats() {
   movesEl.textContent = moves;
-  matchesEl.textContent = `${matchedPairs}/32`;
+  matchesEl.textContent = `${matchedPairs}/18`;
   timerEl.textContent = formatTime(seconds);
 }
 
